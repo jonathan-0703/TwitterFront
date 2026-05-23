@@ -1,0 +1,328 @@
+// Include theming for Angular Material with `mat.theme()`.
+// This Sass mixin will define CSS variables that are used for styling Angular Material
+// components according to the Material 3 design spec.
+// Learn more about theming and how to use it for your application's
+// custom components at https://material.angular.dev/guide/theming
+@use '@angular/material' as mat;
+
+html {
+  height: 100%;
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$azure-palette,
+        tertiary: mat.$blue-palette,
+      ),
+      typography: Roboto,
+      density: 0,
+    )
+  );
+}
+
+body {
+  // Default the application to a light color theme. This can be changed to
+  // `dark` to enable the dark color theme, or to `light dark` to defer to the
+  // user's system settings.
+  color-scheme: dark;
+
+  // Set a default background, font and text colors for the application using
+  // Angular Material's system-level CSS variables. Learn more about these
+  // variables at https://material.angular.dev/guide/system-variables
+  background-color: #07111f;
+  color: #e5eef8;
+  font: var(--mat-sys-body-medium);
+
+  // Reset the user agent margin.
+  margin: 0;
+  height: 100%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  font-family:
+    'Segoe UI',
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+}
+
+body {
+  background:
+    radial-gradient(circle at top, rgb(29 161 242 / 0.14), transparent 28%),
+    #07111f;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+.page-shell {
+  display: grid;
+  gap: 1rem;
+}
+
+.compact-shell {
+  width: min(760px, 100%);
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+}
+
+.metric-card {
+  display: grid;
+  gap: 0.3rem;
+  padding: 1rem;
+  border-radius: 1.2rem;
+  border: 1px solid rgb(148 163 184 / 0.12);
+  background: rgb(2 6 23 / 0.34);
+}
+
+.metric-card strong,
+.metric-card p {
+  margin: 0;
+}
+
+.metric-card strong {
+  font-size: 1.4rem;
+}
+
+.metric-card p {
+  color: rgb(226 232 240 / 0.7);
+  line-height: 1.45;
+}
+
+.panel-stack {
+  display: grid;
+  gap: 1rem;
+}
+
+.page-header,
+.surface-card {
+  background: rgb(15 23 42 / 0.78);
+  border: 1px solid rgb(148 163 184 / 0.14);
+  border-radius: 1.5rem;
+  padding: 1.25rem;
+  box-shadow: 0 20px 50px rgb(2 6 23 / 0.22);
+  backdrop-filter: blur(16px);
+}
+
+.eyebrow {
+  margin: 0 0 0.35rem;
+  color: rgb(148 163 184 / 0.8);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+}
+
+.page-header h1,
+.page-header h2,
+.page-header p,
+.section-head h2,
+.section-head h3,
+.section-head p,
+.surface-card p,
+.surface-card pre {
+  margin: 0;
+}
+
+.page-header p:last-child,
+.section-head p {
+  margin-top: 0.5rem;
+  color: rgb(226 232 240 / 0.72);
+  line-height: 1.6;
+}
+
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.stack {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.field,
+.checkbox-field {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.field span {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.checkbox-field {
+  grid-template-columns: auto 1fr;
+  align-items: center;
+}
+
+.field input,
+.field textarea,
+.checkbox-field input,
+.field select {
+  width: 100%;
+  padding: 0.9rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgb(148 163 184 / 0.16);
+  background: rgb(2 6 23 / 0.55);
+  color: #f8fafc;
+}
+
+.checkbox-field input {
+  width: auto;
+  padding: 0;
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
+  outline: 2px solid rgb(29 155 240 / 0.2);
+  border-color: #1d9bf0;
+}
+
+.button-row,
+.table-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.primary-action,
+.secondary-action,
+.danger-action,
+.inline-link {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.9rem;
+  padding: 0.75rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgb(148 163 184 / 0.16);
+  text-decoration: none;
+  background: rgb(15 23 42 / 0.72);
+  color: inherit;
+  cursor: pointer;
+}
+
+.primary-action {
+  background: #1d9bf0;
+  border-color: #1d9bf0;
+  color: #fff;
+}
+
+.danger-action {
+  background: rgb(69 10 27 / 0.72);
+  border-color: rgb(251 113 133 / 0.22);
+  color: #fecdd3;
+}
+
+button:disabled,
+a[aria-disabled='true'] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.small-action {
+  min-height: 2.3rem;
+  padding: 0.45rem 0.8rem;
+  font-size: 0.85rem;
+}
+
+.feedback {
+  padding: 0.9rem 1rem;
+  border-radius: 1rem;
+  font-size: 0.95rem;
+}
+
+.feedback.error {
+  background: rgb(69 10 27 / 0.85);
+  color: #fecdd3;
+}
+
+.feedback.success {
+  background: rgb(8 47 73 / 0.85);
+  color: #bae6fd;
+}
+
+.json-view {
+  overflow: auto;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: rgb(15 23 42 / 0.95);
+  color: #e2e8f0;
+  font-size: 0.85rem;
+}
+
+.table-wrap {
+  overflow: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table th,
+.data-table td {
+  padding: 0.85rem 0.75rem;
+  border-bottom: 1px solid rgb(148 163 184 / 0.12);
+  text-align: left;
+  vertical-align: top;
+}
+
+.data-table th {
+  color: rgb(148 163 184 / 0.82);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  background: rgb(29 155 240 / 0.14);
+  color: #7dd3fc;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.chip.warn {
+  background: rgb(245 158 11 / 0.16);
+  color: #fde68a;
+}
+
+@media (width <= 720px) {
+  .button-row,
+  .table-actions,
+  .section-head {
+    flex-direction: column;
+  }
+
+  .primary-action,
+  .secondary-action,
+  .danger-action,
+  .inline-link {
+    width: 100%;
+  }
+}

@@ -1,0 +1,267 @@
+<section class="page-shell">
+  <header class="page-header page-hero">
+    <div class="hero-copy">
+      <p class="eyebrow">Admin reports</p>
+      <h1>Reports workflow</h1>
+      <p>Moderate pending cases with the same focused hierarchy, states, and confirmation patterns already used across the stronger screens.</p>
+
+      <div class="summary-grid">
+        <article class="metric-card">
+          <strong>{{ pendingCount() }}</strong>
+          <p>Reports still waiting for a moderation decision.</p>
+        </article>
+        <article class="metric-card">
+          <strong>{{ unassignedPendingCount() }}</strong>
+          <p>Pending cases with no moderator assigned yet.</p>
+        </article>
+        <article class="metric-card">
+          <strong>{{ resolvedCount() }}</strong>
+          <p>Resolved cases already cleared from the workflow.</p>
+        </article>
+        <article class="metric-card">
+          <strong>{{ dismissedCount() }}</strong>
+          <p>Dismissed cases kept only for moderation history.</p>
+        </article>
+      </div>
+    </div>
+
+    <aside class="hero-spotlight">
+      <p class="eyebrow">Queue focus</p>
+
+      @if (queueFocus(); as report) {
+        <strong>{{ reportTitle(report) }}</strong>
+        <p>{{ reportSummary(report) }}</p>
+        <div class="spotlight-meta">
+          <span class="chip" [class.warn]="reportStatus(report) === 'Pending'">{{ reportStatus(report) }}</span>
+          <span>{{ (report.createdAt | date: 'medium') || 'No timestamp' }}</span>
+        </div>
+      } @else {
+        <strong>No queue focus yet</strong>
+        <p>Once the backend returns reports, the next pending case will be surfaced here automatically.</p>
+      }
+    </aside>
+  </header>
+
+  @if (error(); as message) { <p class="feedback error" role="alert">{{ message }}</p> }
+
+  <section class="detail-grid">
+    <article class="surface-card">
+      <header class="section-head">
+        <div>
+          <h2>Pending queue</h2>
+          <p>Open cases stay isolated from history so the next moderation action is obvious.</p>
+        </div>
+
+        <button type="button" class="secondary-action small-action" (click)="load()">Refresh queue</button>
+      </header>
+
+      <div class="report-stack">
+        @if (loading() && !pendingReports().length) {
+          <app-state-card tone="loading" title="Loading pending queue" message="Fetching reports that still need a moderation decision." />
+        } @else {
+          @for (report of pendingReports(); track report.reportId ?? $index) {
+            <article class="report-card" [class.selected]="isSelected(report)">
+              <div class="report-card-head">
+                <span class="chip warn">{{ reportStatus(report) }}</span>
+                <span>{{ (report.createdAt | date: 'medium') || 'No timestamp' }}</span>
+              </div>
+
+              <h3>{{ reportTitle(report) }}</h3>
+              <p>{{ reportSummary(report) }}</p>
+
+              <dl class="fact-grid compact-facts">
+                <div>
+                  <dt>Report id</dt>
+                  <dd>{{ report.reportId || 'Unknown' }}</dd>
+                </div>
+                <div>
+                  <dt>Post</dt>
+                  <dd>{{ report.postId || 'No post id' }}</dd>
+                </div>
+                <div>
+                  <dt>Reported user</dt>
+                  <dd>{{ report.reportedUserId || 'No user id' }}</dd>
+                </div>
+                <div>
+                  <dt>Assigned</dt>
+                  <dd>{{ report.assignedToUserId || 'Unassigned' }}</dd>
+                </div>
+              </dl>
+
+              <div class="table-actions">
+                <button type="button" class="secondary-action small-action" (click)="pick(report)">Open workspace</button>
+                <button
+                  type="button"
+                  class="danger-action small-action"
+                  [disabled]="isActing(report.reportId)"
+                  (click)="dismiss(report)"
+                >
+                  {{ isActing(report.reportId) ? 'Working...' : 'Dismiss' }}
+                </button>
+              </div>
+            </article>
+          } @empty {
+            <app-state-card tone="empty" title="No pending reports" message="Nothing is waiting in the queue right now." />
+          }
+        }
+      </div>
+    </article>
+
+    <article class="surface-card">
+      <header class="section-head">
+        <div>
+          <h2>Report history</h2>
+          <p>Use quick filters to separate pending, resolved, and dismissed history without mixing them into the active queue.</p>
+        </div>
+      </header>
+
+      <div class="filter-row" role="tablist" aria-label="Report history filters">
+        <button type="button" class="filter-pill" [class.active]="historyFilter() === 'all'" (click)="setHistoryFilter('all')">All</button>
+        <button type="button" class="filter-pill" [class.active]="historyFilter() === 'pending'" (click)="setHistoryFilter('pending')">Pending</button>
+        <button type="button" class="filter-pill" [class.active]="historyFilter() === 'resolved'" (click)="setHistoryFilter('resolved')">Resolved</button>
+        <button type="button" class="filter-pill" [class.active]="historyFilter() === 'dismissed'" (click)="setHistoryFilter('dismissed')">Dismissed</button>
+      </div>
+
+      <div class="report-stack history-stack">
+        @if (loading() && !allReports().length) {
+          <app-state-card tone="loading" title="Loading report history" message="Collecting the full report list for moderation review." />
+        } @else {
+          @for (report of filteredHistory(); track report.reportId ?? $index) {
+            <button type="button" class="history-row" [class.selected]="isSelected(report)" (click)="pick(report)">
+              <div>
+                <strong>{{ reportTitle(report) }}</strong>
+                <p>{{ report.reportId || 'Unknown id' }} · {{ report.postId || 'No post id' }}</p>
+              </div>
+
+              <div class="history-row-meta">
+                <span class="chip" [class.warn]="reportStatus(report) === 'Pending'">{{ reportStatus(report) }}</span>
+                <span>{{ (report.createdAt | date: 'short') || 'No timestamp' }}</span>
+              </div>
+            </button>
+          } @empty {
+            <app-state-card tone="empty" title="No reports returned" message="The backend did not return report history records yet." actionLabel="Reload reports" (action)="load()" />
+          }
+        }
+      </div>
+    </article>
+  </section>
+
+  <section class="workspace-grid">
+    <article class="surface-card moderation-card">
+      <header class="section-head">
+        <div>
+          <h2>Moderation workspace</h2>
+          <p>Selection, assignment, and resolution stay in one place so admins do not bounce between disconnected controls.</p>
+        </div>
+      </header>
+
+      @if (selected(); as report) {
+        <div class="selection-summary">
+          <div>
+            <p class="eyebrow">Selected report</p>
+            <h3>{{ reportTitle(report) }}</h3>
+            <p>{{ reportSummary(report) }}</p>
+          </div>
+
+          <span class="chip" [class.warn]="reportStatus(report) === 'Pending'">{{ reportStatus(report) }}</span>
+        </div>
+
+        <dl class="fact-grid">
+          <div>
+            <dt>Report id</dt>
+            <dd>{{ report.reportId || 'Unknown' }}</dd>
+          </div>
+          <div>
+            <dt>Post id</dt>
+            <dd>{{ report.postId || 'No post id' }}</dd>
+          </div>
+          <div>
+            <dt>Reported user</dt>
+            <dd>{{ report.reportedUserId || 'No user id' }}</dd>
+          </div>
+          <div>
+            <dt>Assigned to</dt>
+            <dd>{{ report.assignedToUserId || 'Nobody yet' }}</dd>
+          </div>
+        </dl>
+
+        <form class="stack" [formGroup]="assignForm" (ngSubmit)="assign()">
+          <label class="field">
+            <span>Report id</span>
+            <input formControlName="reportId" />
+          </label>
+
+          <label class="field">
+            <span>Assign to user id</span>
+            <input formControlName="assignedToUserId" placeholder="Moderator or admin id" />
+          </label>
+
+          <div class="button-row">
+            <button type="submit" class="primary-action" [disabled]="isActing(report.reportId)">
+              {{ isActing(report.reportId) ? 'Assigning...' : 'Assign report' }}
+            </button>
+          </div>
+        </form>
+
+        <form class="stack top-gap" [formGroup]="resolveForm" (ngSubmit)="resolve()">
+          <label class="field">
+            <span>Report id</span>
+            <input formControlName="reportId" />
+          </label>
+
+          <label class="field">
+            <span>Resolution note</span>
+            <textarea rows="4" formControlName="resolutionNote" placeholder="Optional note for the moderation trail"></textarea>
+          </label>
+
+          <div class="button-row">
+            <button type="submit" class="primary-action" [disabled]="isActing(report.reportId)">
+              {{ isActing(report.reportId) ? 'Resolving...' : 'Resolve report' }}
+            </button>
+            <button type="button" class="danger-action" [disabled]="isActing(report.reportId)" (click)="dismiss(report)">
+              {{ isActing(report.reportId) ? 'Working...' : 'Dismiss report' }}
+            </button>
+          </div>
+        </form>
+      } @else {
+        <app-state-card
+          tone="empty"
+          title="No report selected"
+          message="Pick any pending or historical report to inspect it and continue the moderation workflow."
+        />
+      }
+    </article>
+
+    <article class="surface-card">
+      <header class="section-head">
+        <div>
+          <h2>Manual report intake</h2>
+          <p>Keep this secondary form available for backend-supported manual report creation without inventing new moderation features.</p>
+        </div>
+      </header>
+
+      <form class="stack" [formGroup]="createForm" (ngSubmit)="create()">
+        <label class="field">
+          <span>Post id</span>
+          <input formControlName="postId" />
+        </label>
+
+        <label class="field">
+          <span>Reason</span>
+          <input formControlName="reason" />
+        </label>
+
+        <label class="field">
+          <span>Description</span>
+          <textarea rows="4" formControlName="description" placeholder="Optional moderation context"></textarea>
+        </label>
+
+        <div class="button-row">
+          <button type="submit" class="primary-action">Create report</button>
+        </div>
+      </form>
+    </article>
+  </section>
+
+  @if (selected(); as report) { <section class="surface-card"><pre class="json-view">{{ report | json }}</pre></section> }
+</section>

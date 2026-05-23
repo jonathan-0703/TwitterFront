@@ -1,0 +1,154 @@
+<section class="page-shell">
+  <header class="page-header page-hero">
+    <div class="hero-copy">
+      <p class="eyebrow">Users</p>
+      <h1>People directory</h1>
+      <p>Browse people with the same profile-forward visual language used in the refined feed and profile screens.</p>
+
+      <div class="summary-grid">
+        <article class="metric-card">
+          <strong>{{ users().length }}</strong>
+          <p>Public user records currently returned by the API.</p>
+        </article>
+        <article class="metric-card">
+          <strong>{{ activeCount() }}</strong>
+          <p>Accounts still active and visible in the directory.</p>
+        </article>
+        <article class="metric-card">
+          <strong>{{ verifiedCount() }}</strong>
+          <p>Profiles carrying the verified account flag.</p>
+        </article>
+        <article class="metric-card">
+          <strong>{{ deletedCount() }}</strong>
+          <p>Deleted records still surfaced by the current payload.</p>
+        </article>
+      </div>
+    </div>
+
+    <aside class="hero-spotlight">
+      <p class="eyebrow">Directory focus</p>
+
+      @if (featuredUser(); as user) {
+        <strong>{{ user.fullName || 'Unknown user' }}</strong>
+        <p>{{ user.email || 'No public email returned for this account.' }}</p>
+        <div class="spotlight-meta">
+          <span class="chip" [class.warn]="statusLabel(user) !== 'Verified' && statusLabel(user) !== 'Active'">{{ statusLabel(user) }}</span>
+          <span>{{ ((user.roles ?? []).join(', ')) || 'User' }}</span>
+        </div>
+      } @else {
+        <strong>No profiles yet</strong>
+        <p>When the people endpoint returns data, the first directory card becomes the spotlight automatically.</p>
+      }
+    </aside>
+  </header>
+
+  @if (storeError(); as message) {
+    <p class="feedback error" role="alert">{{ message }}</p>
+  }
+
+  @if (actionError(); as message) {
+    <p class="feedback error" role="alert">{{ message }}</p>
+  }
+
+  <section class="surface-card">
+    <header class="section-head">
+      <div>
+        <h2>Public users</h2>
+        <p>{{ loading() ? 'Loading…' : directory().length + ' records loaded' }}</p>
+      </div>
+
+      <button type="button" class="secondary-action small-action" (click)="reload()">Refresh directory</button>
+    </header>
+
+    @if (loading() && !users().length) {
+      <app-state-card
+        tone="loading"
+        title="Loading people directory"
+        message="Fetching public member records and profile-safe metadata."
+      />
+    } @else if (!loading() && !users().length) {
+      <app-state-card
+        tone="empty"
+        title="No people returned"
+        message="The list endpoint responded without visible members. Try again after seeding or registering users."
+        actionLabel="Reload people"
+        (action)="reload()"
+      />
+    } @else {
+      <div class="people-grid">
+        @for (user of directory(); track user.userId ?? user.email ?? $index) {
+          <article class="person-card" [class.selected]="selectedUser()?.userId === user.userId">
+            <div class="person-head">
+              <div class="person-avatar" aria-hidden="true">{{ initials(user) }}</div>
+
+              <div>
+                <h3>{{ user.fullName || 'Unknown user' }}</h3>
+                <p>{{ user.email || 'No public email returned' }}</p>
+              </div>
+
+              <span class="chip" [class.warn]="statusLabel(user) !== 'Verified' && statusLabel(user) !== 'Active'">{{ statusLabel(user) }}</span>
+            </div>
+
+            <div class="person-meta">
+              <span>{{ (user.createdAt | date: 'mediumDate') || 'No join date' }}</span>
+              <span>{{ user.userId || 'No user id' }}</span>
+            </div>
+
+            <div class="role-row">
+              @for (role of user.roles ?? ['User']; track role) {
+                <span class="role-pill">{{ role }}</span>
+              }
+            </div>
+
+            <div class="table-actions">
+              <a class="inline-link" [routerLink]="['/profile', user.userId || 'unknown']">Profile</a>
+              <button type="button" class="secondary-action small-action" (click)="inspect(user)">Inspect</button>
+              @if (canDeleteUsers() && user.userId) {
+                <button
+                  type="button"
+                  class="danger-action small-action"
+                  [disabled]="deletingUserId() === user.userId"
+                  (click)="deleteUser(user)"
+                >
+                  {{ deletingUserId() === user.userId ? 'Deleting...' : 'Delete' }}
+                </button>
+              }
+            </div>
+          </article>
+        }
+      </div>
+    }
+  </section>
+
+  @if (selectedUser(); as user) {
+    <section class="surface-card">
+      <header class="section-head">
+        <div>
+          <h2>Selected profile snapshot</h2>
+          <p>Inspect the current DTO without leaving the directory flow.</p>
+        </div>
+      </header>
+
+      <div class="fact-grid">
+        <article class="fact-card">
+          <span>Status</span>
+          <strong>{{ statusLabel(user) }}</strong>
+        </article>
+        <article class="fact-card">
+          <span>Email</span>
+          <strong>{{ user.email || 'No email returned' }}</strong>
+        </article>
+        <article class="fact-card">
+          <span>Roles</span>
+          <strong>{{ ((user.roles ?? []).join(', ')) || 'User' }}</strong>
+        </article>
+        <article class="fact-card">
+          <span>Joined</span>
+          <strong>{{ (user.createdAt | date: 'mediumDate') || 'Unknown' }}</strong>
+        </article>
+      </div>
+
+      <pre class="json-view">{{ user | json }}</pre>
+    </section>
+  }
+</section>

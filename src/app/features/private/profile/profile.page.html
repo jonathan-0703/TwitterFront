@@ -1,0 +1,115 @@
+<section class="page-shell">
+  <header class="surface-card hero-card">
+    <div class="profile-banner"></div>
+
+    @if (profile(); as user) {
+      <div class="hero-identity">
+        <div class="profile-avatar" aria-hidden="true">{{ initials(user) }}</div>
+
+        <div class="identity-copy">
+          <p class="eyebrow">Profile</p>
+          <h1>{{ user.fullName || 'Unnamed user' }}</h1>
+          <p>{{ displayHandle() }} · {{ user.email || 'No public email returned' }}</p>
+        </div>
+
+        <div class="identity-state">
+          <span class="chip" [class.warn]="statusLabel() !== 'Verified' && statusLabel() !== 'Active'">{{ statusLabel() }}</span>
+        </div>
+      </div>
+
+      <div class="summary-grid">
+        <article class="metric-card">
+          <strong>{{ posts().length }}</strong>
+          <p>Posts matched in the current feed payload.</p>
+        </article>
+        <article class="metric-card">
+          <strong>{{ publishedPostsCount() }}</strong>
+          <p>Published posts currently visible.</p>
+        </article>
+        <article class="metric-card">
+          <strong>{{ draftPostsCount() }}</strong>
+          <p>Drafts still attached to this user.</p>
+        </article>
+      </div>
+    } @else if (loading()) {
+      <p>Loading profile snapshot…</p>
+    }
+  </header>
+
+  @if (profileError(); as message) {
+    <p class="feedback error" role="alert">{{ message }}</p>
+  }
+
+  <section class="detail-grid">
+    <article class="surface-card">
+      <header class="section-head">
+        <div>
+          <h2>Profile snapshot</h2>
+          <p>A tighter summary of the fields the backend reliably exposes today.</p>
+        </div>
+      </header>
+
+      @if (profile(); as user) {
+        <div class="profile-facts">
+          <article class="fact-card">
+            <span>Email</span>
+            <strong>{{ user.email || 'No public email returned' }}</strong>
+          </article>
+          <article class="fact-card">
+            <span>Roles</span>
+            <strong>{{ (user.roles ?? []).join(', ') || 'User' }}</strong>
+          </article>
+          <article class="fact-card">
+            <span>Joined</span>
+            <strong>{{ (joinedLabel() | date: 'mediumDate') || 'Unknown' }}</strong>
+          </article>
+          <article class="fact-card">
+            <span>Status</span>
+            <strong>{{ statusLabel() }}</strong>
+          </article>
+        </div>
+
+        <pre class="json-view">{{ user | json }}</pre>
+      } @else if (loading()) {
+        <app-state-card tone="loading" title="Resolving profile" message="Waiting for the member detail endpoint to respond." />
+      } @else {
+        <app-state-card
+          tone="empty"
+          title="No profile payload"
+          message="The API did not return a profile object for this route yet."
+          actionLabel="Retry"
+          (action)="reload()"
+        />
+      }
+    </article>
+
+    <article class="surface-card">
+      <header class="section-head">
+        <div>
+          <h2>Recent posts</h2>
+          <p>Filtered from feed data when the backend exposes matching userId values.</p>
+        </div>
+      </header>
+
+      <div class="profile-posts">
+        @for (post of posts(); track trackPost($index, post)) {
+          <article class="inline-post">
+            <div class="inline-post-head">
+              <span class="chip" [class.warn]="!post.isPublished">{{ post.isPublished ? 'Published' : 'Draft' }}</span>
+              <span>{{ (postDateLabel(post) | date: 'medium') || 'No timestamp' }}</span>
+            </div>
+            <p>{{ post.content || 'No content returned.' }}</p>
+          </article>
+        } @empty {
+          <app-state-card
+            tone="empty"
+            title="No matching posts"
+            message="This profile has no visible posts in the current feed payload yet."
+            actionLabel="Reload profile"
+            (action)="reload()"
+          />
+        }
+      </div>
+    </article>
+  </section>
+</section>

@@ -1,0 +1,73 @@
+<section class="page-shell">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Admin audit</p>
+      <h1>Audit logs</h1>
+      <p>Give the moderation trail hierarchy so actions, entities, and actors can be scanned instead of deciphered from raw JSON.</p>
+    </div>
+
+    <div class="summary-grid">
+      <article class="metric-card">
+        <strong>{{ logs().length }}</strong>
+        <p>Audit events loaded from the backend.</p>
+      </article>
+      <article class="metric-card">
+        <strong>{{ uniqueActors() }}</strong>
+        <p>Distinct user ids represented in the current log window.</p>
+      </article>
+    </div>
+  </header>
+
+  @if (error(); as message) {
+    <p class="feedback error" role="alert">{{ message }}</p>
+  }
+
+  <section class="surface-card panel-stack">
+    <div class="section-head">
+      <div>
+        <h2>Audit activity</h2>
+        <p>Read-only view of GET /api/admin/audit/logs with stronger grouping and empty states.</p>
+      </div>
+
+      <button type="button" class="secondary-action small-action" (click)="load()">Reload logs</button>
+    </div>
+
+    @if (loading() && !logs().length) {
+      <app-state-card tone="loading" title="Loading audit logs" message="Pulling the latest backend moderation trail." />
+    } @else if (!loading() && !logs().length) {
+      <app-state-card
+        tone="empty"
+        title="No audit logs returned"
+        message="The backend did not return any audit events for this request window."
+        actionLabel="Reload logs"
+        (action)="load()"
+      />
+    } @else {
+      <div class="audit-list">
+        @for (log of logs(); track trackLog($index, log)) {
+          <article class="audit-item">
+            <div class="audit-head">
+              <div>
+                <strong>{{ log.action || 'Unknown action' }}</strong>
+                <p>{{ log.entityType || 'Unknown entity' }} · {{ log.entityId || 'No entity id' }}</p>
+              </div>
+
+              <span class="chip">{{ (log.createdAt | date: 'short') || 'No timestamp' }}</span>
+            </div>
+
+            <dl>
+              <div>
+                <dt>Actor</dt>
+                <dd>{{ log.userId || 'Unknown user' }}</dd>
+              </div>
+              <div>
+                <dt>Event id</dt>
+                <dd>{{ log.id || 'No id' }}</dd>
+              </div>
+            </dl>
+          </article>
+        }
+      </div>
+    }
+  </section>
+</section>

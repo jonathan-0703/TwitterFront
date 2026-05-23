@@ -1,0 +1,71 @@
+<section class="page-shell">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Admin posts</p>
+      <h1>Post moderation</h1>
+      <p>List, flag, soft-delete, and restore posts.</p>
+    </div>
+  </header>
+
+  @if (error(); as message) {
+    <p class="feedback error" role="alert">{{ message }}</p>
+  }
+
+  <section class="surface-card data-grid-card">
+    @if (loading() && !posts().length) {
+      <app-state-card tone="loading" title="Loading moderation posts" message="Pulling the admin post list, report counters, and publish states." />
+    } @else if (!loading() && !posts().length) {
+      <app-state-card
+        tone="empty"
+        title="No moderation posts"
+        message="The admin posts endpoint did not return any records."
+        actionLabel="Reload posts"
+        (action)="load()"
+      />
+    } @else {
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Post</th>
+              <th>Author</th>
+              <th>Published</th>
+              <th>Reports</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (post of posts(); track post.postId ?? $index) {
+              <tr>
+                <td>{{ post.content || 'No content' }}</td>
+                <td>{{ post.userFullName || post.userId || 'Unknown' }}</td>
+                <td>{{ post.isPublished ? 'Yes' : 'No' }}</td>
+                <td>{{ post.reportCount ?? 0 }}</td>
+                <td>
+                  <div class="table-actions">
+                    <button type="button" class="secondary-action small-action" (click)="pick(post)">Select</button>
+                    <button type="button" class="danger-action small-action" (click)="deletePost(post.postId)">Delete</button>
+                    <button type="button" class="secondary-action small-action" (click)="restorePost(post.postId)">Restore</button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+
+  <section class="surface-card compact-shell">
+    <header class="section-head"><div><h2>Flag post</h2></div></header>
+    <form class="stack" [formGroup]="flagForm" (ngSubmit)="flagSelected()">
+      <label class="field"><span>Post id</span><input type="text" formControlName="postId" /></label>
+      <label class="field"><span>Reason</span><input type="text" formControlName="reason" /></label>
+      <div class="button-row"><button type="submit" class="primary-action">Flag post</button></div>
+    </form>
+  </section>
+
+  @if (selected(); as post) {
+    <section class="surface-card"><pre class="json-view">{{ post | json }}</pre></section>
+  }
+</section>

@@ -1,0 +1,91 @@
+<section class="page-shell">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Admin users</p>
+      <h1>User operations</h1>
+      <p>List, delete, restore, verify, unverify, and change user roles.</p>
+    </div>
+  </header>
+
+  @if (error(); as message) {
+    <p class="feedback error" role="alert">{{ message }}</p>
+  }
+
+  <section class="surface-card data-grid-card">
+    @if (loading() && !users().length) {
+      <app-state-card tone="loading" title="Loading admin users" message="Retrieving moderation-level user records and account states." />
+    } @else if (!loading() && !users().length) {
+      <app-state-card
+        tone="empty"
+        title="No users returned"
+        message="The admin list endpoint did not return any user records."
+        actionLabel="Reload users"
+        (action)="load()"
+      />
+    } @else {
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Roles</th>
+              <th>State</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (user of users(); track user.userId ?? user.email ?? $index) {
+              <tr>
+                <td>{{ user.fullName || 'Unknown' }}</td>
+                <td>{{ user.email || '—' }}</td>
+                <td>{{ (user.roles ?? []).join(', ') || 'User' }}</td>
+                <td>{{ user.deletedAt ? 'Deleted' : user.isVerified ? 'Verified' : 'Active' }}</td>
+                <td>
+                  <div class="table-actions">
+                    <button type="button" class="secondary-action small-action" (click)="pick(user)">Select</button>
+                    <button type="button" class="secondary-action small-action" (click)="verifyUser(user.userId, !!user.isVerified)">
+                      {{ user.isVerified ? 'Unverify' : 'Verify' }}
+                    </button>
+                    <button type="button" class="danger-action small-action" (click)="deleteUser(user.userId)">Delete</button>
+                    <button type="button" class="secondary-action small-action" (click)="restoreUser(user.userId)">Restore</button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+
+  <section class="surface-card compact-shell">
+    <header class="section-head">
+      <div>
+        <h2>Change role</h2>
+      </div>
+    </header>
+
+    <form class="stack" [formGroup]="roleForm" (ngSubmit)="submitRoleChange()">
+      <label class="field">
+        <span>User id</span>
+        <input type="text" formControlName="userId" />
+      </label>
+
+      <label class="field">
+        <span>Role</span>
+        <input type="text" formControlName="role" />
+      </label>
+
+      <div class="button-row">
+        <button type="submit" class="primary-action" [disabled]="!!actingId()">Update role</button>
+      </div>
+    </form>
+  </section>
+
+  @if (selected(); as user) {
+    <section class="surface-card">
+      <pre class="json-view">{{ user | json }}</pre>
+    </section>
+  }
+</section>

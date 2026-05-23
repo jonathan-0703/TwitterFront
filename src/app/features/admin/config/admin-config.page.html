@@ -1,0 +1,108 @@
+<section class="page-shell">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Admin config</p>
+      <h1>Runtime configuration</h1>
+      <p>Make the configuration surface feel like a control room, not a raw payload dump.</p>
+    </div>
+
+    <div class="summary-grid">
+      <article class="metric-card">
+        <strong>{{ entries().length }}</strong>
+        <p>Config entries currently loaded.</p>
+      </article>
+      <article class="metric-card">
+        <strong>{{ describedEntries() }}</strong>
+        <p>Entries that already include backend descriptions.</p>
+      </article>
+    </div>
+  </header>
+
+  @if (error(); as message) {
+    <p class="feedback error" role="alert">{{ message }}</p>
+  }
+
+  <section class="detail-grid">
+    <article class="surface-card panel-stack">
+      <header class="section-head">
+        <div>
+          <h2>Lookup key</h2>
+          <p>Jump directly to one runtime setting when you know the exact key.</p>
+        </div>
+      </header>
+
+      <form class="stack" [formGroup]="lookupForm" (ngSubmit)="lookup()">
+        <label class="field"><span>Config key</span><input formControlName="key" /></label>
+        <div class="button-row">
+          <button type="submit" class="primary-action" [disabled]="loading()">{{ loading() ? 'Loading...' : 'Lookup' }}</button>
+        </div>
+      </form>
+    </article>
+
+    <article class="surface-card panel-stack">
+      <header class="section-head">
+        <div>
+          <h2>Update value</h2>
+          <p>Use confirmation before sending changes that affect runtime behavior.</p>
+        </div>
+      </header>
+
+      <form class="stack" [formGroup]="updateForm" (ngSubmit)="update()">
+        <label class="field"><span>Key</span><input formControlName="key" /></label>
+        <label class="field"><span>Value</span><textarea rows="5" formControlName="value"></textarea></label>
+        <div class="button-row">
+          <button type="submit" class="primary-action" [disabled]="saving()">{{ saving() ? 'Saving...' : 'Save config' }}</button>
+        </div>
+      </form>
+    </article>
+  </section>
+
+  <section class="surface-card panel-stack">
+    <header class="section-head">
+      <div>
+        <h2>Loaded entries</h2>
+        <p>Pick an entry to hydrate the lookup and update forms.</p>
+      </div>
+    </header>
+
+    @if (loading() && !entries().length) {
+      <app-state-card tone="loading" title="Loading config" message="Retrieving runtime configuration entries from the backend." />
+    } @else if (!loading() && !entries().length) {
+      <app-state-card
+        tone="empty"
+        title="No config entries returned"
+        message="The runtime config endpoint did not return any values yet."
+        actionLabel="Reload config"
+        (action)="load()"
+      />
+    } @else {
+      <div class="entry-grid">
+        @for (entry of entries(); track trackEntry($index, entry)) {
+          <article class="entry-card">
+            <div class="entry-copy">
+              <strong>{{ entry.key || 'Unnamed key' }}</strong>
+              <p>{{ entry.description || 'No description returned by the backend.' }}</p>
+            </div>
+
+            <pre class="value-preview">{{ entry.value || '—' }}</pre>
+
+            <button type="button" class="secondary-action small-action" (click)="pickEntry(entry)">Use this key</button>
+          </article>
+        }
+      </div>
+    }
+  </section>
+
+  @if (selected(); as entry) {
+    <section class="surface-card panel-stack">
+      <header class="section-head">
+        <div>
+          <h2>Selected key</h2>
+          <p>{{ entry.key || 'Unknown key' }}</p>
+        </div>
+      </header>
+
+      <pre class="json-view">{{ entry | json }}</pre>
+    </section>
+  }
+</section>

@@ -1,0 +1,56 @@
+<section class="page-shell">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Admin dashboard</p>
+      <h1>Platform stats</h1>
+      <p>Consumes GET /api/admin/dashboard/stats and POST /api/admin/dashboard/recalculate.</p>
+    </div>
+    <div class="button-row">
+      <button type="button" class="primary-action" [disabled]="recalculating()" (click)="recalculate()">
+        {{ recalculating() ? 'Recalculating...' : 'Recalculate stats' }}
+      </button>
+    </div>
+  </header>
+
+  @if (error(); as message) {
+    <p class="feedback error" role="alert">{{ message }}</p>
+  }
+
+  <section class="summary-grid">
+    @if (loading() && !entries().length) {
+      <app-state-card tone="loading" title="Loading platform stats" message="Collecting the moderation dashboard counters and system totals." />
+    } @else if (!loading() && !entries().length) {
+      <app-state-card
+        tone="empty"
+        title="No dashboard stats"
+        message="The dashboard endpoint responded without counters yet."
+        actionLabel="Reload stats"
+        (action)="load()"
+      />
+    } @else {
+      @for (item of entries(); track item.label) {
+        <article class="surface-card summary-card">
+          <span>{{ item.label }}</span>
+          <strong>{{ item.value ?? '—' }}</strong>
+        </article>
+      }
+    }
+  </section>
+
+  @if (stats(); as stats) {
+    <section class="surface-card">
+      <pre class="json-view">{{ stats | json }}</pre>
+    </section>
+  }
+
+  @if (actionResult(); as result) {
+    <section class="surface-card">
+      <header class="section-head">
+        <div>
+          <h2>Last recalculate response</h2>
+        </div>
+      </header>
+      <pre class="json-view">{{ result | json }}</pre>
+    </section>
+  }
+</section>

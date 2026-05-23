@@ -1,0 +1,226 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at top, rgb(29 155 240 / 0.18), transparent 28%),
+    linear-gradient(180deg, #07111f, #0b1727 42%, #09121f 100%);
+}
+
+.private-shell {
+  width: min(1260px, 100%);
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: 0 1rem;
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr) 320px;
+  gap: 1.5rem;
+}
+
+.rail {
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  padding: 1.5rem 0;
+}
+
+.left-rail {
+  display: grid;
+  align-content: start;
+  gap: 2rem;
+}
+
+.brand {
+  width: 3rem;
+  height: 3rem;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #1d9bf0;
+  color: #fff;
+  text-decoration: none;
+  font-size: 1.5rem;
+  font-weight: 800;
+  box-shadow: 0 18px 40px rgb(29 155 240 / 0.35);
+}
+
+.account-card,
+.panel {
+  background: rgb(15 23 42 / 0.72);
+  border: 1px solid rgb(148 163 184 / 0.16);
+  border-radius: 1.5rem;
+  padding: 1.15rem;
+  backdrop-filter: blur(16px);
+}
+
+.account-card {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.account-card strong {
+  font-size: 1.05rem;
+}
+
+.account-card p,
+.panel-copy {
+  margin: 0;
+  color: rgb(226 232 240 / 0.68);
+  line-height: 1.5;
+}
+
+.nav-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.nav-group-label {
+  margin-top: 0.25rem;
+  color: rgb(148 163 184 / 0.72);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.nav-list a {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border-radius: 1rem;
+  text-decoration: none;
+  font-weight: 600;
+  color: #e2e8f0;
+  border: 1px solid transparent;
+}
+
+.nav-list a.active,
+.nav-list a:hover {
+  background: rgb(29 155 240 / 0.16);
+  color: #7dd3fc;
+  border-color: rgb(29 155 240 / 0.22);
+}
+
+.admin-link {
+  background: rgb(91 33 182 / 0.16);
+  border-color: rgb(167 139 250 / 0.18);
+}
+
+.logout-button {
+  width: 100%;
+  margin-top: auto;
+}
+
+.content-column {
+  min-height: 100dvh;
+  padding: 1rem 0;
+}
+
+.panel {
+  margin-top: 1rem;
+}
+
+.panel h2 {
+  margin: 0 0 1rem;
+}
+
+.trend-item {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.85rem 0;
+  border-top: 1px solid rgb(148 163 184 / 0.12);
+}
+
+.trend-item:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.trend-item span {
+  color: rgb(148 163 184 / 0.78);
+  font-size: 0.75rem;
+}
+
+@media (width <= 1100px) {
+  .private-shell {
+    grid-template-columns: 88px minmax(0, 1fr);
+  }
+
+  .right-rail {
+    display: none;
+  }
+
+  .nav-list a {
+    padding-inline: 0.75rem;
+  }
+}
+
+@media (width <= 720px) {
+  .private-shell {
+    grid-template-columns: 1fr;
+    padding-inline: 0;
+    padding-bottom: 80px;
+  }
+
+  .rail {
+    position: fixed;
+    height: auto;
+    padding: 0;
+    z-index: 100;
+  }
+
+  .left-rail {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(11, 23, 39, 0.95);
+    backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(148, 163, 184, 0.12);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0.5rem 0;
+  }
+
+  .brand {
+    display: none;
+  }
+
+  .account-card {
+    display: none;
+  }
+
+  .nav-list {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    gap: 0;
+  }
+
+  .nav-list a {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.75rem;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .nav-group-label {
+    display: none;
+  }
+
+  .admin-link {
+    background: rgba(91, 33, 182, 0.2);
+  }
+
+  .logout-button {
+    display: none;
+  }
+
+  .content-column {
+    padding: 1rem;
+    min-height: auto;
+  }
+
+  .right-rail {
+    display: none;
+  }
+}

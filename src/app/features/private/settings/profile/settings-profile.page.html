@@ -1,0 +1,106 @@
+<section class="page-shell compact-shell">
+  <header class="page-header page-hero">
+    <div class="hero-copy">
+      <p class="eyebrow">Settings</p>
+      <h1>Edit profile</h1>
+      <p>Keep profile editing consistent with the newer state-card shell: clear feedback, stronger hierarchy, and a visible account snapshot beside the form.</p>
+
+      <div class="summary-grid">
+        <article class="metric-card">
+          <strong>{{ statusLabel() }}</strong>
+          <p>Current account state derived from the live profile payload.</p>
+        </article>
+        <article class="metric-card">
+          <strong>{{ currentUser()?.email || '—' }}</strong>
+          <p>Email currently attached to the authenticated account.</p>
+        </article>
+      </div>
+    </div>
+
+    <aside class="hero-spotlight">
+      <p class="eyebrow">Account snapshot</p>
+      <strong>{{ currentUser()?.fullName || 'Loading current user' }}</strong>
+      <p>{{ rolesLabel() }}</p>
+      <span class="chip" [class.warn]="statusLabel() !== 'Verified' && statusLabel() !== 'Active'">{{ statusLabel() }}</span>
+    </aside>
+  </header>
+
+  @if (error(); as message) {
+    <p class="feedback error" role="alert">{{ message }}</p>
+  }
+
+  @if (successMessage(); as message) {
+    <p class="feedback success">{{ message }}</p>
+  }
+
+  @if (loading() && !currentUser()) {
+    <app-state-card tone="loading" title="Loading your profile" message="Waiting for the authenticated user payload before opening the form." />
+  } @else if (!loading() && !currentUser()) {
+    <app-state-card tone="empty" title="No profile returned" message="The current user endpoint did not return a profile payload." actionLabel="Retry" (action)="reload()" />
+  } @else {
+    <section class="detail-grid">
+      <section class="surface-card">
+        <header class="section-head">
+          <div>
+            <h2>Profile form</h2>
+            <p>Edit only the fields already supported by the backend update endpoint.</p>
+          </div>
+        </header>
+
+        <form class="stack" [formGroup]="form" (ngSubmit)="save()">
+          <label class="field">
+            <span>Full name</span>
+            <input type="text" formControlName="fullName" autocomplete="name" />
+          </label>
+
+          <label class="field">
+            <span>Email</span>
+            <input type="email" formControlName="email" autocomplete="email" />
+          </label>
+
+          <label class="checkbox-field">
+            <input type="checkbox" formControlName="isActive" />
+            <span>Active profile</span>
+          </label>
+
+          <div class="button-row">
+            <button type="submit" class="primary-action" [disabled]="loading() || form.pristine">{{ loading() ? 'Saving...' : 'Save changes' }}</button>
+            <button type="button" class="secondary-action" [disabled]="loading()" (click)="resetToCurrentValues()">Reset form</button>
+          </div>
+        </form>
+      </section>
+
+      @if (currentUser(); as user) {
+        <section class="surface-card">
+          <header class="section-head">
+            <div>
+              <h2>Live account details</h2>
+              <p>Use the payload preview as a defensive fallback while backend DTOs are still settling.</p>
+            </div>
+          </header>
+
+          <div class="fact-grid">
+            <article class="fact-card">
+              <span>Status</span>
+              <strong>{{ statusLabel() }}</strong>
+            </article>
+            <article class="fact-card">
+              <span>Roles</span>
+              <strong>{{ rolesLabel() }}</strong>
+            </article>
+            <article class="fact-card">
+              <span>Joined</span>
+              <strong>{{ (user.createdAt | date: 'mediumDate') || 'Unknown' }}</strong>
+            </article>
+            <article class="fact-card">
+              <span>User id</span>
+              <strong>{{ user.userId || 'No id returned' }}</strong>
+            </article>
+          </div>
+
+          <pre class="json-view">{{ user | json }}</pre>
+        </section>
+      }
+    </section>
+  }
+</section>

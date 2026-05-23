@@ -1,0 +1,33 @@
+<section class="public-shell">
+  <header class="public-header">
+    <a routerLink="/login" class="brand">Twitter Clone</a>
+    <nav class="public-nav">
+      <a routerLink="/login">Login</a>
+      <a routerLink="/register">Register</a>
+      <span class="status">Public area</span>
+    </nav>
+  </header>
+
+  <main class="public-main">
+    <section class="public-copy">
+      <p class="eyebrow">Frontend shell ready</p>
+      <h1>Sign in fast. Stay focused. Moderate with intent.</h1>
+      <p>The app already speaks to the real auth, profile, posts, and moderation endpoints. This pass makes it feel deliberate, not provisional.</p>
+
+      <div class="feature-points">
+        <div>
+          <strong>Realtime-ready shell</strong>
+          <p>Clear routing across public, member, and admin spaces.</p>
+        </div>
+        <div>
+          <strong>Session resilience</strong>
+          <p>Token hydration and refresh rotation are already wired in.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="public-card" aria-label="Authentication area">
+      <router-outlet />
+    </section>
+  </main>
+</section>

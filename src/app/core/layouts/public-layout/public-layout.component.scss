@@ -1,0 +1,148 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at top left, rgb(29 155 240 / 0.18), transparent 28%),
+    linear-gradient(180deg, #07111f, #0b1727 44%, #09121f 100%);
+}
+
+.public-shell {
+  min-height: 100dvh;
+  padding: 2rem;
+  display: grid;
+  gap: 2rem;
+}
+
+.public-header,
+.public-main {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+}
+
+.public-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.brand {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #7dd3fc;
+  text-decoration: none;
+}
+
+.public-nav {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.public-nav a {
+  text-decoration: none;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.status,
+.eyebrow {
+  color: rgb(148 163 184 / 0.82);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+}
+
+.public-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 420px);
+  gap: 2rem;
+  align-items: center;
+}
+
+.public-copy h1 {
+  margin: 0 0 1rem;
+  font-size: clamp(2rem, 5vw, 4rem);
+  line-height: 1;
+}
+
+.public-copy p:last-child {
+  color: rgb(226 232 240 / 0.78);
+  line-height: 1.6;
+}
+
+.feature-points {
+  display: grid;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.feature-points div {
+  padding: 1rem 1.1rem;
+  border-radius: 1.25rem;
+  border: 1px solid rgb(148 163 184 / 0.14);
+  background: rgb(15 23 42 / 0.55);
+}
+
+.feature-points strong,
+.feature-points p {
+  margin: 0;
+}
+
+.feature-points p {
+  margin-top: 0.4rem;
+  color: rgb(226 232 240 / 0.7);
+}
+
+.public-card {
+  background: rgb(15 23 42 / 0.82);
+  border: 1px solid rgb(148 163 184 / 0.16);
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 20px 50px rgb(2 6 23 / 0.28);
+  backdrop-filter: blur(18px);
+}
+
+@media (width <= 900px) {
+  .public-shell {
+    padding: 1.25rem;
+    gap: 1.5rem;
+  }
+
+  .public-main {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .public-copy h1 {
+    font-size: clamp(1.75rem, 6vw, 2.5rem);
+  }
+}
+
+@media (width <= 480px) {
+  .public-shell {
+    padding: 1rem;
+  }
+
+  .public-header {
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+
+  .public-nav {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .public-copy h1 {
+    font-size: 1.5rem;
+  }
+
+  .feature-points {
+    margin-top: 1.5rem;
+  }
+
+  .public-card {
+    padding: 1.25rem;
+  }
+}

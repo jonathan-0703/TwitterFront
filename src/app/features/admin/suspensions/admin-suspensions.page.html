@@ -1,0 +1,119 @@
+<section class="page-shell">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Admin suspensions</p>
+      <h1>Suspension controls</h1>
+      <p>Give moderation actions more ceremony: clear intent, explicit confirmation, and readable history.</p>
+    </div>
+
+    <div class="summary-grid">
+      <article class="metric-card">
+        <strong>{{ history().length }}</strong>
+        <p>History entries loaded for the current user lookup.</p>
+      </article>
+      <article class="metric-card">
+        <strong>{{ activeHistoryCount() }}</strong>
+        <p>Entries still active without a lift timestamp.</p>
+      </article>
+    </div>
+  </header>
+
+  @if (error(); as message) {
+    <p class="feedback error" role="alert">{{ message }}</p>
+  }
+
+  <section class="detail-grid">
+    <article class="surface-card action-card">
+      <header class="section-head">
+        <div>
+          <h2>Suspend user</h2>
+          <p>Use when a moderation decision is final and time-bounded details are known.</p>
+        </div>
+      </header>
+
+      <form class="stack" [formGroup]="suspendForm" (ngSubmit)="suspend()">
+        <label class="field"><span>User id</span><input formControlName="userId" /></label>
+        <label class="field"><span>Reason</span><input formControlName="reason" /></label>
+        <label class="field"><span>Until</span><input type="datetime-local" formControlName="until" /></label>
+
+        <div class="button-row">
+          <button type="submit" class="danger-action" [disabled]="!!acting()">Suspend user</button>
+        </div>
+      </form>
+    </article>
+
+    <article class="surface-card action-card">
+      <header class="section-head">
+        <div>
+          <h2>Lift suspension</h2>
+          <p>Restore the account only after review notes and follow-up decisions are complete.</p>
+        </div>
+      </header>
+
+      <form class="stack" [formGroup]="liftForm" (ngSubmit)="lift()">
+        <label class="field"><span>User id</span><input formControlName="userId" /></label>
+        <label class="field"><span>Reason</span><input formControlName="reason" /></label>
+
+        <div class="button-row">
+          <button type="submit" class="primary-action" [disabled]="!!acting()">Lift suspension</button>
+        </div>
+      </form>
+    </article>
+  </section>
+
+  <section class="surface-card panel-stack">
+    <header class="section-head">
+      <div>
+        <h2>History lookup</h2>
+        <p>Track the latest moderation trail for one account at a time.</p>
+      </div>
+    </header>
+
+    <form class="stack compact-shell" [formGroup]="lookupForm" (ngSubmit)="lookup()">
+      <label class="field"><span>User id</span><input formControlName="userId" /></label>
+      <div class="button-row">
+        <button type="submit" class="primary-action" [disabled]="loadingHistory()">{{ loadingHistory() ? 'Loading...' : 'Load history' }}</button>
+      </div>
+    </form>
+
+    @if (loadingHistory() && !history().length) {
+      <app-state-card tone="loading" title="Loading history" message="Pulling the suspension timeline for this account." />
+    } @else if (!loadingHistory() && !history().length) {
+      <app-state-card
+        tone="empty"
+        title="No suspension history loaded"
+        message="Enter a user id to inspect the moderation trail, or confirm that the backend has records for that account."
+      />
+    } @else {
+      <div class="history-list">
+        @for (item of history(); track trackHistory($index, item)) {
+          <article class="history-item">
+            <div class="history-head">
+              <strong>{{ item.reason || 'No reason captured' }}</strong>
+              <span class="chip" [class.warn]="!!item.liftedAt">{{ item.liftedAt ? 'Lifted' : 'Active' }}</span>
+            </div>
+
+            <dl>
+              <div>
+                <dt>User</dt>
+                <dd>{{ item.userId || 'Unknown' }}</dd>
+              </div>
+              <div>
+                <dt>Created</dt>
+                <dd>{{ (item.createdAt | date: 'medium') || 'Unknown' }}</dd>
+              </div>
+              <div>
+                <dt>Until</dt>
+                <dd>{{ (item.until | date: 'medium') || 'No limit set' }}</dd>
+              </div>
+              <div>
+                <dt>Lifted</dt>
+                <dd>{{ (item.liftedAt | date: 'medium') || 'Still active' }}</dd>
+              </div>
+            </dl>
+          </article>
+        }
+      </div>
+    }
+  </section>
+</section>

@@ -1,0 +1,24 @@
+<div class="admin-shell">
+  <aside class="admin-sidebar">
+    <p class="eyebrow">Admin area</p>
+    <h1>Operations</h1>
+    <p class="intro-copy">Moderation, safety, and platform controls stay visually separate from the member-facing shell.</p>
+
+    <nav>
+      <a routerLink="/admin/dashboard" routerLinkActive="active">Dashboard</a>
+      <a routerLink="/admin/users" routerLinkActive="active">Users</a>
+      <a routerLink="/admin/posts" routerLinkActive="active">Posts</a>
+      <a routerLink="/admin/reports" routerLinkActive="active">Reports</a>
+      <a routerLink="/admin/suspensions" routerLinkActive="active">Suspensions</a>
+      <a routerLink="/admin/config" routerLinkActive="active">Config</a>
+      <a routerLink="/admin/audit" routerLinkActive="active">Audit</a>
+      <a routerLink="/home">Back to app</a>
+    </nav>
+
+    <button type="button" class="secondary-action logout-button" (click)="logout()">Log out</button>
+  </aside>
+
+  <main class="admin-content">
+    <router-outlet />
+  </main>
+</div>

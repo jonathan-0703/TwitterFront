@@ -1,0 +1,81 @@
+<section class="page-shell compact-shell">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Public route</p>
+      <h2>Create account</h2>
+      <p>Registration is public, and this screen also exposes the SMTP test endpoint for integration checks.</p>
+    </div>
+  </header>
+
+  <section class="surface-card">
+    <form class="stack" [formGroup]="registerForm" (ngSubmit)="register()">
+      <label class="field">
+        <span>Full name</span>
+        <input type="text" formControlName="fullName" autocomplete="name" />
+      </label>
+
+      <label class="field">
+        <span>Email</span>
+        <input type="email" formControlName="email" autocomplete="email" />
+      </label>
+
+      <label class="field">
+        <span>Password</span>
+        <input type="password" formControlName="password" autocomplete="new-password" />
+      </label>
+
+      @if (errorMessage(); as message) {
+        <p class="feedback error" role="alert">{{ message }}</p>
+      }
+
+      @if (successMessage(); as message) {
+        <p class="feedback success">{{ message }}</p>
+      }
+
+      <div class="button-row">
+        <button type="submit" class="primary-action" [disabled]="loading()">{{ loading() ? 'Creating...' : 'Register' }}</button>
+        <a routerLink="/login" class="secondary-action">Back to login</a>
+      </div>
+    </form>
+  </section>
+
+  <section class="surface-card">
+    <header class="section-head">
+      <div>
+        <h3>SMTP test</h3>
+        <p>Useful while backend SMTP credentials are being verified.</p>
+      </div>
+    </header>
+
+    <form class="stack" [formGroup]="testEmailForm" (ngSubmit)="sendTestEmail()">
+      <label class="field">
+        <span>Destination email</span>
+        <input type="email" formControlName="to" autocomplete="email" />
+      </label>
+
+      <label class="field">
+        <span>Subject</span>
+        <input type="text" formControlName="subject" />
+      </label>
+
+      <label class="field">
+        <span>Body</span>
+        <textarea rows="4" formControlName="body"></textarea>
+      </label>
+
+      @if (testEmailError(); as message) {
+        <p class="feedback error" role="alert">{{ message }}</p>
+      }
+
+      <div class="button-row">
+        <button type="submit" class="primary-action" [disabled]="testEmailLoading()">
+          {{ testEmailLoading() ? 'Sending...' : 'Send test email' }}
+        </button>
+      </div>
+    </form>
+
+    @if (testEmailResult(); as result) {
+      <pre class="json-view">{{ result | json }}</pre>
+    }
+  </section>
+</section>

@@ -1,0 +1,44 @@
+<div class="private-shell">
+  <aside class="rail left-rail" aria-label="Primary navigation">
+    <a routerLink="/home" class="brand" aria-label="Go to home feed">T</a>
+
+    <section class="account-card">
+      <p class="eyebrow">Signed in</p>
+      <strong>{{ currentRole() || 'Member' }}</strong>
+      <p>Clean, fast access to your main timeline and account controls.</p>
+    </section>
+
+    <nav class="nav-list">
+      <a routerLink="/home" routerLinkActive="active">Home feed</a>
+      <a [routerLink]="profileLink()" routerLinkActive="active">My profile</a>
+      <a routerLink="/people" routerLinkActive="active">People</a>
+      <a routerLink="/settings/profile" routerLinkActive="active">Profile settings</a>
+      <a routerLink="/settings/password" routerLinkActive="active">Password</a>
+
+      @if (isAdmin()) {
+        <span class="nav-group-label">Moderation</span>
+        <a routerLink="/admin/dashboard" routerLinkActive="active" class="admin-link">Admin console</a>
+      }
+    </nav>
+
+    <button type="button" class="secondary-action logout-button" (click)="logout()">Log out</button>
+  </aside>
+
+  <main class="content-column">
+    <router-outlet />
+  </main>
+
+  <aside class="rail right-rail" aria-label="Sidebar placeholder">
+    <section class="panel">
+      <h2>What&apos;s happening</h2>
+      <p class="panel-copy">Keep the interface focused: publish, review, and manage the account without hunting through menus.</p>
+
+      @for (trend of trends; track trend) {
+        <div class="trend-item">
+          <span>Trending</span>
+          <strong>{{ trend }}</strong>
+        </div>
+      }
+    </section>
+  </aside>
+</div>

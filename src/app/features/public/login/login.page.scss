@@ -1,0 +1,95 @@
+.page-card {
+  display: grid;
+  gap: 1rem;
+}
+
+.eyebrow {
+  margin: 0;
+  color: #536471;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+}
+
+h2,
+p {
+  margin: 0;
+}
+
+p {
+  color: #536471;
+  line-height: 1.6;
+}
+
+.stack {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.field span {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #0f1419;
+}
+
+input {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border-radius: 0.85rem;
+  border: 1px solid rgb(15 20 25 / 0.14);
+  background: #fff;
+  font: inherit;
+  color: #0f1419;
+  min-height: 44px;
+}
+
+@media (width <= 480px) {
+  input {
+    padding: 0.75rem 0.85rem;
+    font-size: 16px;
+  }
+}
+
+input:focus {
+  outline: 2px solid rgb(29 155 240 / 0.2);
+  border-color: #1d9bf0;
+}
+
+.field-error,
+.feedback {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.field-error,
+.feedback.error {
+  color: #c62828;
+}
+
+button,
+a {
+  width: 100%;
+  padding: 0.95rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgb(15 20 25 / 0.12);
+  background: #fff;
+  text-align: center;
+  text-decoration: none;
+  font: inherit;
+}
+
+button {
+  background: #1d9bf0;
+  border-color: #1d9bf0;
+  color: #fff;
+}
+
+button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}

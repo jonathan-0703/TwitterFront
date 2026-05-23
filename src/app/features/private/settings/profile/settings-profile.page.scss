@@ -1,0 +1,54 @@
+:host {
+  display: block;
+}
+
+.page-hero,
+.hero-copy,
+.hero-spotlight,
+.detail-grid,
+.fact-grid,
+.fact-card {
+  display: grid;
+  gap: 1rem;
+}
+
+.page-hero,
+.detail-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.hero-spotlight,
+.fact-card {
+  border-radius: 1.25rem;
+  border: 1px solid rgb(148 163 184 / 0.12);
+  background: rgb(2 6 23 / 0.26);
+  padding: 1rem;
+}
+
+.hero-spotlight p,
+.fact-card span,
+.fact-card strong {
+  margin: 0;
+}
+
+.hero-spotlight p,
+.fact-card span {
+  color: rgb(226 232 240 / 0.72);
+}
+
+.fact-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: 1rem;
+}
+
+.fact-card {
+  gap: 0.35rem;
+}
+
+@media (width <= 900px) {
+  .page-hero,
+  .detail-grid,
+  .fact-grid {
+    grid-template-columns: 1fr;
+  }
+}

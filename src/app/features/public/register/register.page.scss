@@ -1,0 +1,139 @@
+:host {
+  display: block;
+}
+
+.page-shell {
+  display: grid;
+  gap: 1.5rem;
+  padding: 1rem;
+}
+
+.page-header h2,
+.page-header p {
+  margin: 0;
+}
+
+.page-header p {
+  color: rgb(148 163 184 / 0.8);
+  line-height: 1.55;
+  margin-top: 0.5rem;
+}
+
+.surface-card {
+  background: rgb(15 23 42 / 0.72);
+  border: 1px solid rgb(148 163 184 / 0.16);
+  border-radius: 1.25rem;
+  padding: 1.25rem;
+}
+
+.stack {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.field span {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+input,
+textarea {
+  width: 100%;
+  padding: 0.8rem 0.9rem;
+  border-radius: 0.85rem;
+  border: 1px solid rgb(148 163 184 / 0.2);
+  background: rgb(2 6 23 / 0.6);
+  font: inherit;
+  color: #e2e8f0;
+  min-height: 44px;
+}
+
+input:focus,
+textarea:focus {
+  outline: 2px solid rgb(29 155 240 / 0.25);
+  border-color: #1d9bf0;
+}
+
+.feedback {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.feedback.error {
+  color: #f87171;
+}
+
+.feedback.success {
+  color: #4ade80;
+}
+
+.button-row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.button-row button,
+.button-row a {
+  flex: 1 1 auto;
+  min-width: 120px;
+  padding: 0.85rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgb(148 163 184 / 0.2);
+  background: rgb(2 6 23 / 0.6);
+  text-align: center;
+  text-decoration: none;
+  font: inherit;
+  color: #e2e8f0;
+  cursor: pointer;
+}
+
+.button-row .primary-action {
+  background: #1d9bf0;
+  border-color: #1d9bf0;
+  color: #fff;
+}
+
+.button-row button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.json-view {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: rgb(2 6 23 / 0.8);
+  border-radius: 0.75rem;
+  overflow-x: auto;
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+@media (width <= 480px) {
+  .page-shell {
+    padding: 0.75rem;
+    gap: 1rem;
+  }
+
+  .surface-card {
+    padding: 1rem;
+  }
+
+  input,
+  textarea {
+    padding: 0.7rem 0.8rem;
+    font-size: 16px;
+  }
+
+  .button-row button,
+  .button-row a {
+    min-width: 100px;
+    padding: 0.75rem 0.85rem;
+  }
+}
