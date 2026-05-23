@@ -4,6 +4,7 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
 import { SessionService } from '../../auth/session.service';
 import { adminRoles } from '../../auth/session.model';
 import { FeedbackService } from '../../ui/feedback.service';
+import { ThemeService } from '../../ui/theme.service';
 
 @Component({
   selector: 'app-private-layout',
@@ -16,6 +17,7 @@ export class PrivateLayoutComponent {
   private readonly sessionService = inject(SessionService);
   private readonly feedback = inject(FeedbackService);
   private readonly router = inject(Router);
+  protected readonly themeService = inject(ThemeService);
 
   protected readonly trends = ['Angular 21', 'Signals', 'Render', 'Frontend Architecture'];
   protected readonly profileLink = computed(() => ['/profile', this.sessionService.userId() ?? 'me']);

@@ -2,8 +2,9 @@
   display: block;
   min-height: 100dvh;
   background:
-    radial-gradient(circle at top, rgb(29 155 240 / 0.18), transparent 28%),
-    linear-gradient(180deg, #07111f, #0b1727 42%, #09121f 100%);
+    radial-gradient(circle at top, rgba(29, 155, 240, 0.08), transparent 28%),
+    var(--bg-primary);
+  transition: background-color 0.3s ease;
 }
 
 .private-shell {
@@ -45,11 +46,13 @@
 
 .account-card,
 .panel {
-  background: rgb(15 23 42 / 0.72);
-  border: 1px solid rgb(148 163 184 / 0.16);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: 1.5rem;
   padding: 1.15rem;
   backdrop-filter: blur(16px);
+  box-shadow: var(--card-shadow);
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .account-card {
@@ -59,12 +62,13 @@
 
 .account-card strong {
   font-size: 1.05rem;
+  color: var(--text-primary);
 }
 
 .account-card p,
 .panel-copy {
   margin: 0;
-  color: rgb(226 232 240 / 0.68);
+  color: var(--text-secondary);
   line-height: 1.5;
 }
 
@@ -75,7 +79,7 @@
 
 .nav-group-label {
   margin-top: 0.25rem;
-  color: rgb(148 163 184 / 0.72);
+  color: var(--text-secondary);
   font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -88,25 +92,77 @@
   border-radius: 1rem;
   text-decoration: none;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-primary);
   border: 1px solid transparent;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: var(--brand-light);
+    color: var(--brand-color);
+    transform: translateX(3px);
+  }
 }
 
-.nav-list a.active,
-.nav-list a:hover {
-  background: rgb(29 155 240 / 0.16);
-  color: #7dd3fc;
-  border-color: rgb(29 155 240 / 0.22);
+.nav-list a.active {
+  background: var(--brand-light);
+  color: var(--brand-color);
+  border-color: transparent;
 }
 
 .admin-link {
-  background: rgb(91 33 182 / 0.16);
-  border-color: rgb(167 139 250 / 0.18);
+  background: rgba(91, 33, 182, 0.08) !important;
+  border-color: rgba(167, 139, 250, 0.15) !important;
+  color: rgb(196, 181, 253) !important;
+
+  &:hover {
+    background: rgba(91, 33, 182, 0.16) !important;
+    color: rgb(216, 180, 254) !important;
+  }
+}
+
+.sidebar-footer {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: auto;
+  width: 100%;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+.theme-toggle-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.8rem 1rem;
+  border-radius: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: rgba(148, 163, 184, 0.06);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  color: inherit;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    background: rgba(148, 163, 184, 0.12);
+    border-color: rgba(148, 163, 184, 0.25);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  .theme-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: #eab308;
+    flex-shrink: 0;
+  }
 }
 
 .logout-button {
   width: 100%;
-  margin-top: auto;
 }
 
 .content-column {
@@ -211,7 +267,7 @@
     background: rgba(91, 33, 182, 0.2);
   }
 
-  .logout-button {
+  .sidebar-footer {
     display: none;
   }
 

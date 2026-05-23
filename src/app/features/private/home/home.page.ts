@@ -1,5 +1,5 @@
 import { DatePipe, JsonPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, HostListener, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 
@@ -42,14 +42,26 @@ export class HomePage {
   readonly selectedPost = signal<PostDto | null>(null);
   readonly selectedPostError = signal<string | null>(null);
   readonly editingPostId = signal<string | null>(null);
-  readonly likedPosts = signal<Record<string, boolean>>({});
-  readonly retweetedPosts = signal<Record<string, boolean>>({});
+  readonly likedPosts = this.postStore.likedPosts;
+  readonly retweetedPosts = this.postStore.retweetedPosts;
   readonly openComments = signal<Record<string, boolean>>({});
-  readonly postComments = signal<Record<string, Array<{ id: string; author: string; initials: string; text: string; time: string }>>>({});
-  readonly viewsCounts = signal<Record<string, number>>({});
+  readonly originalPostsCache = signal<Record<string, PostDto>>({});
+  readonly activeRetweetMenu = signal<string | null>(null);
+  
+  readonly isQuoteModalOpen = signal(false);
+  readonly postToQuote = signal<PostDto | null>(null);
+  
+  readonly isComposeModalOpen = signal(false);
+  readonly isDetailModalOpen = signal(false);
+  readonly postInDetail = signal<PostDto | null>(null);
+
   readonly form = this.formBuilder.group({
     content: ['', [Validators.required, Validators.minLength(2)]],
     isPublished: [true],
+  });
+
+  readonly quoteForm = this.formBuilder.group({
+    content: ['', [Validators.required, Validators.maxLength(280)]],
   });
   readonly publishedCount = computed(() => this.posts().filter((post) => Boolean(post.isPublished)).length);
   readonly draftCount = computed(() => this.posts().filter((post) => !post.isPublished).length);
@@ -95,6 +107,11 @@ export class HomePage {
     });
   }
 
+  @HostListener('document:click')
+  protected closeAllMenus(): void {
+    this.activeRetweetMenu.set(null);
+  }
+
   protected async submit(): Promise<void> {
     if (this.form.invalid || this.saving()) {
       this.form.markAllAsTouched();
@@ -133,6 +150,7 @@ export class HomePage {
 
       if (response) {
         this.resetForm();
+        this.isComposeModalOpen.set(false);
       }
     } catch {
       // Store feedback handles this
@@ -173,9 +191,12 @@ export class HomePage {
       return;
     }
 
+    const localPost = this.posts().find((p) => p.postId === postId);
+    const targetId = (localPost && localPost.repliedToPostId) ? localPost.repliedToPostId : postId;
+
     try {
       this.selectedPostError.set(null);
-      this.selectedPost.set(await firstValueFrom(this.postsApi.getPostById(postId)));
+      this.selectedPost.set(await firstValueFrom(this.postsApi.getPostById(targetId)));
     } catch (error) {
       this.selectedPost.set(null);
       this.selectedPostError.set(getErrorMessage(error, 'We could not fetch the post details.'));
@@ -257,35 +278,105 @@ export class HomePage {
   }
 
   protected toggleLike(post: PostDto): void {
-    const postId = post.postId;
-    if (!postId) return;
-    this.likedPosts.update((prev) => ({ ...prev, [postId]: !prev[postId] }));
+    void this.postStore.toggleLike(post);
   }
 
   protected getLikesCount(post: PostDto): number {
-    const postId = post.postId;
-    if (!postId) return post.likesCount ?? 0;
-    const isLiked = this.isLiked(postId);
-    const base = post.likesCount ?? 0;
-    return isLiked ? base + 1 : base;
+    return post.likesCount ?? 0;
   }
 
   protected isRetweeted(postId: string | undefined): boolean {
     return postId ? Boolean(this.retweetedPosts()[postId]) : false;
   }
 
-  protected toggleRetweet(post: PostDto): void {
+  protected toggleRetweetMenu(postId: string | undefined, event: Event): void {
+    if (!postId) return;
+    event.stopPropagation();
+    if (this.activeRetweetMenu() === postId) {
+      this.activeRetweetMenu.set(null);
+    } else {
+      this.activeRetweetMenu.set(postId);
+    }
+  }
+
+  protected async directRetweet(post: PostDto): Promise<void> {
     const postId = post.postId;
     if (!postId) return;
-    this.retweetedPosts.update((prev) => ({ ...prev, [postId]: !prev[postId] }));
+    this.activeRetweetMenu.set(null);
+    await this.postStore.retweet(postId, null);
+  }
+
+  protected openQuoteModal(post: PostDto): void {
+    this.activeRetweetMenu.set(null);
+    this.postToQuote.set(post);
+    this.quoteForm.reset({ content: '' });
+    this.isQuoteModalOpen.set(true);
+  }
+
+  protected closeQuoteModal(): void {
+    this.isQuoteModalOpen.set(false);
+    this.postToQuote.set(null);
+  }
+
+  protected async submitQuoteTweet(): Promise<void> {
+    const post = this.postToQuote();
+    const postId = post?.postId;
+    if (!postId || this.quoteForm.invalid) {
+      return;
+    }
+
+    const raw = this.quoteForm.getRawValue();
+    const content = raw.content.trim();
+
+    const success = await this.postStore.retweet(postId, content);
+    if (success) {
+      this.closeQuoteModal();
+    }
+  }
+
+  protected openComposeModal(): void {
+    this.resetForm();
+    this.isComposeModalOpen.set(true);
+  }
+
+  protected closeComposeModal(): void {
+    this.isComposeModalOpen.set(false);
+    this.resetForm();
+  }
+
+  protected async openDetailModal(post: PostDto): Promise<void> {
+    const repliedId = post.repliedToPostId;
+    if (repliedId) {
+      const parent = this.getOriginalPost(repliedId);
+      if (parent) {
+        this.postInDetail.set(parent);
+        this.isDetailModalOpen.set(true);
+      } else {
+        try {
+          const fetchedParent = await firstValueFrom(this.postsApi.getPostById(repliedId));
+          if (fetchedParent) {
+            this.originalPostsCache.update(cache => ({ ...cache, [repliedId]: fetchedParent }));
+            this.postInDetail.set(fetchedParent);
+            this.isDetailModalOpen.set(true);
+          }
+        } catch {
+          this.postInDetail.set(post);
+          this.isDetailModalOpen.set(true);
+        }
+      }
+    } else {
+      this.postInDetail.set(post);
+      this.isDetailModalOpen.set(true);
+    }
+  }
+
+  protected closeDetailModal(): void {
+    this.isDetailModalOpen.set(false);
+    this.postInDetail.set(null);
   }
 
   protected getRetweetsCount(post: PostDto): number {
-    const postId = post.postId;
-    if (!postId) return post.retweetsCount ?? 0;
-    const isRetweeted = this.isRetweeted(postId);
-    const base = post.retweetsCount ?? 0;
-    return isRetweeted ? base + 1 : base;
+    return post.retweetsCount ?? 0;
   }
 
   protected isCommentsOpen(postId: string | undefined): boolean {
@@ -298,35 +389,77 @@ export class HomePage {
   }
 
   protected getRepliesCount(post: PostDto): number {
-    const postId = post.postId;
-    if (!postId) return post.repliesCount ?? 0;
-    const localCount = this.postComments()[postId]?.length ?? 0;
-    return (post.repliesCount ?? 0) + localCount;
+    return post.repliesCount ?? 0;
   }
 
-  protected getComments(postId: string | undefined): Array<{ id: string; author: string; initials: string; text: string; time: string }> {
+  protected getPostReplies(postId: string | undefined): PostDto[] {
     if (!postId) return [];
-    return this.postComments()[postId] || [];
+    return this.posts().filter((p) => p.repliedToPostId === postId && Boolean(p.isPublished));
   }
 
-  protected addComment(postId: string | undefined, text: string): void {
-    console.log('addComment called for postId:', postId, 'with text:', text);
+  protected async addComment(postId: string | undefined, text: string): Promise<void> {
     if (!postId || !text.trim()) {
-      console.log('addComment ignored because postId or text is invalid');
       return;
     }
-    const newComment = {
-      id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2),
-      author: 'You',
-      initials: 'YO',
-      text: text.trim(),
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    };
-    this.postComments.update((prev) => ({
-      ...prev,
-      [postId]: [newComment, ...(prev[postId] || [])]
-    }));
-    console.log('addComment finished successfully. Current comments for post:', this.postComments()[postId]);
+    await this.postStore.addComment(postId, text.trim());
+  }
+
+  protected getOriginalPost(retweetOfPostId: string | undefined): PostDto | null {
+    if (!retweetOfPostId) return null;
+
+    const found = this.posts().find((p) => p.postId === retweetOfPostId);
+    if (found) return found;
+
+    const cached = this.originalPostsCache()[retweetOfPostId];
+    if (cached) return cached;
+
+    if (!(retweetOfPostId in this.originalPostsCache())) {
+      this.originalPostsCache.update((cache) => ({
+        ...cache,
+        [retweetOfPostId]: {
+          postId: retweetOfPostId,
+          userFullName: 'Original Author',
+          username: 'original',
+          content: 'Loading shared publication details...',
+          createdAt: new Date().toISOString(),
+          isPublished: true,
+          likesCount: 0,
+          retweetsCount: 0,
+          repliesCount: 0
+        } as PostDto
+      }));
+
+      firstValueFrom(this.postsApi.getPostById(retweetOfPostId))
+        .then((original) => {
+          if (original) {
+            this.originalPostsCache.update((cache) => ({ ...cache, [retweetOfPostId]: original }));
+          }
+        })
+        .catch(() => {
+          this.originalPostsCache.update((cache) => ({
+            ...cache,
+            [retweetOfPostId]: {
+              postId: retweetOfPostId,
+              userFullName: 'Unavailable',
+              username: 'unavailable',
+              content: 'This shared post could not be loaded (it might be private or deleted).',
+              createdAt: new Date().toISOString(),
+              isPublished: true,
+              likesCount: 0,
+              retweetsCount: 0,
+              repliesCount: 0
+            } as PostDto
+          }));
+        });
+    }
+
+    return this.originalPostsCache()[retweetOfPostId] ?? null;
+  }
+
+  protected getParentAuthorHandle(repliedToPostId: string | null | undefined): string {
+    if (!repliedToPostId) return '@author';
+    const parent = this.getOriginalPost(repliedToPostId);
+    return parent ? this.authorHandle(parent) : '@author';
   }
 
   protected getViewCount(post: PostDto): number {

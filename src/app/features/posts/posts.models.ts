@@ -10,6 +10,7 @@ export interface PostDto extends JsonRecord {
   userAvatar?: string | null;
   username?: string | null;
   repliedToPostId?: string | null;
+  retweetOfPostId?: string | null;
   reportCount?: number;
   isFlagged?: boolean;
   deletedReason?: string | null;

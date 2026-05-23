@@ -40,6 +40,18 @@ export class PostsApiService {
     return this.api.patch<PostDto, ChangePostStatusRequest>(`/api/post/${id}/change-status`, payload);
   }
 
+  toggleLike(id: string): Observable<PostDto> {
+    return this.api.post<PostDto, {}>(`/api/post/${id}/like`, {});
+  }
+
+  createComment(id: string, payload: { content: string }): Observable<PostDto> {
+    return this.api.post<PostDto, { content: string }>(`/api/post/${id}/comment`, payload);
+  }
+
+  createRetweet(id: string, payload: { content: string | null }): Observable<PostDto> {
+    return this.api.post<PostDto, { content: string | null }>(`/api/post/${id}/retweet`, payload);
+  }
+
   deletePost(id: string): Observable<JsonRecord> {
     return this.api.delete<JsonRecord>(`/api/post/${id}/delete`);
   }

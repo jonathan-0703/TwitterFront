@@ -17,17 +17,22 @@ export class PostStoreService {
   private readonly loadingState = signal(false);
   private readonly savingState = signal(false);
   private readonly errorState = signal<string | null>(null);
+  private readonly likedPostsState = signal<Record<string, boolean>>({});
+  private readonly retweetedPostsState = signal<Record<string, boolean>>({});
 
   readonly posts = this.postsState.asReadonly();
   readonly loading = this.loadingState.asReadonly();
   readonly saving = this.savingState.asReadonly();
   readonly error = this.errorState.asReadonly();
+  readonly likedPosts = this.likedPostsState.asReadonly();
+  readonly retweetedPosts = this.retweetedPostsState.asReadonly();
   readonly myPosts = computed(() => this.postsState().filter((post) => post.userId === this.sessionService.userId()));
 
   async loadPosts(): Promise<void> {
     try {
       this.loadingState.set(true);
       this.errorState.set(null);
+      this.loadPersistedInteractions();
       this.postsState.set(await firstValueFrom(this.postsApi.listPosts()));
     } catch (error) {
       this.errorState.set(getErrorMessage(error, 'We could not load the feed yet.'));
@@ -115,6 +120,97 @@ export class PostStoreService {
     }
   }
 
+  async toggleLike(post: PostDto): Promise<void> {
+    const postId = post.postId;
+    if (!postId) return;
+
+    const wasLiked = Boolean(this.likedPostsState()[postId]);
+    const originalLikesCount = post.likesCount ?? 0;
+
+    // Optimistically update
+    this.likedPostsState.update(prev => ({ ...prev, [postId]: !wasLiked }));
+    this.persistInteractions();
+    
+    this.postsState.update(posts =>
+      posts.map(p => {
+        if (p.postId === postId) {
+          const nextCount = wasLiked ? Math.max(0, originalLikesCount - 1) : originalLikesCount + 1;
+          return { ...p, likesCount: nextCount };
+        }
+        return p;
+      })
+    );
+
+    try {
+      const updated = await firstValueFrom(this.postsApi.toggleLike(postId));
+      if (updated && updated.postId) {
+        this.patchPost(updated);
+      }
+    } catch (error) {
+      // Revert on failure
+      this.likedPostsState.update(prev => ({ ...prev, [postId]: wasLiked }));
+      this.persistInteractions();
+      
+      this.postsState.update(posts =>
+        posts.map(p => {
+          if (p.postId === postId) {
+            return { ...p, likesCount: originalLikesCount };
+          }
+          return p;
+        })
+      );
+      this.feedback.error(getErrorMessage(error, 'We could not alternate the like state.'), { title: 'Like failed' });
+    }
+  }
+
+  async addComment(postId: string, content: string): Promise<PostDto | null> {
+    return this.save(async () => {
+      const response = await firstValueFrom(this.postsApi.createComment(postId, { content }));
+      if (response) {
+        this.postsState.update(posts => [response, ...posts]);
+        
+        // Increment the parent replies count locally
+        this.postsState.update(posts =>
+          posts.map(p => {
+            if (p.postId === postId) {
+              return { ...p, repliesCount: (p.repliesCount ?? 0) + 1 };
+            }
+            return p;
+          })
+        );
+        this.feedback.success('Your comment reply has been posted.', { title: 'Comment created' });
+      }
+      return response;
+    }, 'We could not submit the comment.');
+  }
+
+  async retweet(postId: string, content: string | null): Promise<PostDto | null> {
+    return this.save(async () => {
+      const response = await firstValueFrom(this.postsApi.createRetweet(postId, { content }));
+      if (response) {
+        this.postsState.update(posts => [response, ...posts]);
+        this.retweetedPostsState.update(prev => ({ ...prev, [postId]: true }));
+        this.persistInteractions();
+
+        // Increment original post retweets count locally
+        this.postsState.update(posts =>
+          posts.map(p => {
+            if (p.postId === postId) {
+              return { ...p, retweetsCount: (p.retweetsCount ?? 0) + 1 };
+            }
+            return p;
+          })
+        );
+
+        this.feedback.success(
+          content ? 'Quote tweet posted successfully.' : 'Post shared successfully.',
+          { title: content ? 'Quote shared' : 'Retweeted' }
+        );
+      }
+      return response;
+    }, 'We could not retweet the publication.');
+  }
+
   private patchPost(post: PostDto): void {
     this.postsState.update((posts) => {
       const next = posts.map((item) => (item.postId === post.postId ? post : item));
@@ -134,6 +230,36 @@ export class PostStoreService {
       return null;
     } finally {
       this.savingState.set(false);
+    }
+  }
+
+  private loadPersistedInteractions(): void {
+    const userId = this.sessionService.userId();
+    if (!userId) return;
+
+    try {
+      const liked = localStorage.getItem(`liked_posts_${userId}`);
+      if (liked) {
+        this.likedPostsState.set(JSON.parse(liked));
+      }
+      const retweeted = localStorage.getItem(`retweeted_posts_${userId}`);
+      if (retweeted) {
+        this.retweetedPostsState.set(JSON.parse(retweeted));
+      }
+    } catch {
+      // Storage unavailable fallback
+    }
+  }
+
+  private persistInteractions(): void {
+    const userId = this.sessionService.userId();
+    if (!userId) return;
+
+    try {
+      localStorage.setItem(`liked_posts_${userId}`, JSON.stringify(this.likedPostsState()));
+      localStorage.setItem(`retweeted_posts_${userId}`, JSON.stringify(this.retweetedPostsState()));
+    } catch {
+      // Storage unavailable fallback
     }
   }
 }

@@ -2,8 +2,9 @@
   display: block;
   min-height: 100dvh;
   background:
-    radial-gradient(circle at top left, rgb(29 155 240 / 0.18), transparent 28%),
-    linear-gradient(180deg, #07111f, #0b1727 44%, #09121f 100%);
+    radial-gradient(circle at top left, rgba(29, 155, 240, 0.08), transparent 28%),
+    var(--bg-primary);
+  transition: background-color 0.3s ease;
 }
 
 .public-shell {
@@ -41,12 +42,12 @@
 .public-nav a {
   text-decoration: none;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-primary);
 }
 
 .status,
 .eyebrow {
-  color: rgb(148 163 184 / 0.82);
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-size: 0.75rem;
@@ -66,7 +67,7 @@
 }
 
 .public-copy p:last-child {
-  color: rgb(226 232 240 / 0.78);
+  color: var(--text-secondary);
   line-height: 1.6;
 }
 
@@ -79,8 +80,8 @@
 .feature-points div {
   padding: 1rem 1.1rem;
   border-radius: 1.25rem;
-  border: 1px solid rgb(148 163 184 / 0.14);
-  background: rgb(15 23 42 / 0.55);
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
 }
 
 .feature-points strong,
@@ -90,15 +91,15 @@
 
 .feature-points p {
   margin-top: 0.4rem;
-  color: rgb(226 232 240 / 0.7);
+  color: var(--text-secondary);
 }
 
 .public-card {
-  background: rgb(15 23 42 / 0.82);
-  border: 1px solid rgb(148 163 184 / 0.16);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: 1.5rem;
   padding: 1.5rem;
-  box-shadow: 0 20px 50px rgb(2 6 23 / 0.28);
+  box-shadow: var(--card-shadow);
   backdrop-filter: blur(18px);
 }
 

@@ -147,46 +147,143 @@
     } @else {
       <div class="feed-list">
         @for (post of posts(); track trackPost($index, post)) {
-          <article class="surface-card post-card">
-            <div class="post-avatar" aria-hidden="true">{{ authorInitials(post) }}</div>
-
-            <div class="post-body">
-              <div class="post-meta">
-                <div>
-                  <strong>{{ authorName(post) }}</strong>
-                  <p>{{ authorHandle(post) }} · {{ (post.createdAt | date: 'medium') || 'No timestamp' }}</p>
-                </div>
-
-                <span class="chip" [class.warn]="!post.isPublished">{{ post.isPublished ? 'Published' : 'Draft' }}</span>
+          <article class="surface-card post-card clickable-card" [class.retweet-card]="post.retweetOfPostId && !post.content" (click)="openDetailModal(post)">
+            
+            <!-- 1. RETWEET PURO HEADER BANNER (Outside standard 2-column flow but spans both) -->
+            @if (post.retweetOfPostId && !post.content) {
+              <div class="retweet-indicator-row" aria-hidden="true">
+                <svg class="retweet-indicator-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+                </svg>
+                <span>{{ post.userFullName }} shared this</span>
               </div>
+            }
 
-              <p class="post-content">{{ post.content || 'No content returned by the API.' }}</p>
+            <!-- 2. AVATAR COLUMN (Resolved based on post type) -->
+            @if (post.retweetOfPostId && !post.content) {
+              @if (getOriginalPost(post.retweetOfPostId); as origPost) {
+                <div class="post-avatar" aria-hidden="true">{{ authorInitials(origPost) }}</div>
+              } @else {
+                <div class="post-avatar" aria-hidden="true">??</div>
+              }
+            } @else {
+              <div class="post-avatar" aria-hidden="true">{{ authorInitials(post) }}</div>
+            }
 
-              @if (post.mediaUrls && post.mediaUrls.length) {
-                <div class="post-media-grid">
-                  @for (url of post.mediaUrls; track url) {
-                    <div class="post-media-item">
-                      @if (getMediaType(url) === 'video') {
-                        <video [src]="getAbsoluteMediaUrl(url)" controls class="post-video"></video>
-                      } @else if (getMediaType(url) === 'audio') {
-                        <div class="audio-container">
-                          <span class="audio-label">🎵 Audio Attachment</span>
-                          <audio [src]="getAbsoluteMediaUrl(url)" controls class="post-audio"></audio>
+            <!-- 3. MAIN BODY COLUMN -->
+            <div class="post-body">
+              
+              <!-- Content and details depending on post type -->
+              @if (post.retweetOfPostId && !post.content) {
+                @if (getOriginalPost(post.retweetOfPostId); as origPost) {
+                  <div class="post-meta">
+                    <div>
+                      <strong>{{ authorName(origPost) }}</strong>
+                      <p>{{ authorHandle(origPost) }} · {{ (origPost.createdAt | date: 'medium') || 'No timestamp' }}</p>
+                    </div>
+                    <span class="chip" [class.warn]="!origPost.isPublished">{{ origPost.isPublished ? 'Published' : 'Draft' }}</span>
+                  </div>
+
+                  <p class="post-content">{{ origPost.content || 'No content returned by the API.' }}</p>
+
+                  @if (origPost.mediaUrls && origPost.mediaUrls.length) {
+                    <div class="post-media-grid">
+                      @for (url of origPost.mediaUrls; track url) {
+                        <div class="post-media-item">
+                          @if (getMediaType(url) === 'video') {
+                            <video [src]="getAbsoluteMediaUrl(url)" controls class="post-video" (click)="$event.stopPropagation()"></video>
+                          } @else if (getMediaType(url) === 'audio') {
+                            <div class="audio-container" (click)="$event.stopPropagation()">
+                              <span class="audio-label">🎵 Audio Attachment</span>
+                              <audio [src]="getAbsoluteMediaUrl(url)" controls class="post-audio"></audio>
+                            </div>
+                          } @else {
+                            <img [src]="getAbsoluteMediaUrl(url)" alt="Shared post attachment" class="post-image" />
+                          }
                         </div>
-                      } @else {
-                        <img [src]="getAbsoluteMediaUrl(url)" alt="Post attachment" class="post-image" />
                       }
                     </div>
                   }
+                } @else {
+                  <p class="post-content">Loading shared publication...</p>
+                }
+              } @else {
+                <!-- Standard post or Quote Tweet -->
+                <div class="post-meta">
+                  <div>
+                    <strong>{{ authorName(post) }}</strong>
+                    <p>{{ authorHandle(post) }} · {{ (post.createdAt | date: 'medium') || 'No timestamp' }}</p>
+                  </div>
+                  <span class="chip" [class.warn]="!post.isPublished">{{ post.isPublished ? 'Published' : 'Draft' }}</span>
                 </div>
+
+                @if (post.repliedToPostId) {
+                  <div class="replying-to-header">
+                    <span>Replying to </span>
+                    <button type="button" class="reply-target-btn" (click)="inspect(post.repliedToPostId); $event.stopPropagation()">
+                      {{ getParentAuthorHandle(post.repliedToPostId) }}
+                    </button>
+                  </div>
+                }
+
+                <p class="post-content">{{ post.content || 'No content returned by the API.' }}</p>
+
+                <!-- Nested Quoted Post Box -->
+                @if (post.retweetOfPostId) {
+                  @if (getOriginalPost(post.retweetOfPostId); as origPost) {
+                    <div class="nested-quote-card">
+                      <header class="nested-quote-meta">
+                        <div class="nested-quote-avatar">{{ authorInitials(origPost) }}</div>
+                        <strong>{{ authorName(origPost) }}</strong>
+                        <span>{{ authorHandle(origPost) }}</span>
+                      </header>
+                      <p class="nested-quote-content">{{ origPost.content }}</p>
+
+                      @if (origPost.mediaUrls && origPost.mediaUrls.length) {
+                        <div class="nested-quote-media">
+                          @for (url of origPost.mediaUrls; track url) {
+                            <div class="post-media-item small-media">
+                              @if (getMediaType(url) === 'video') {
+                                <video [src]="getAbsoluteMediaUrl(url)" controls class="post-video" (click)="$event.stopPropagation()"></video>
+                              } @else if (getMediaType(url) === 'audio') {
+                                <audio [src]="getAbsoluteMediaUrl(url)" controls class="post-audio" (click)="$event.stopPropagation()"></audio>
+                              } @else {
+                                <img [src]="getAbsoluteMediaUrl(url)" alt="Shared post attachment" class="post-image" />
+                              }
+                            </div>
+                          }
+                        </div>
+                      }
+                    </div>
+                  }
+                }
+
+                @if (post.mediaUrls && post.mediaUrls.length) {
+                  <div class="post-media-grid">
+                    @for (url of post.mediaUrls; track url) {
+                      <div class="post-media-item">
+                        @if (getMediaType(url) === 'video') {
+                          <video [src]="getAbsoluteMediaUrl(url)" controls class="post-video" (click)="$event.stopPropagation()"></video>
+                        } @else if (getMediaType(url) === 'audio') {
+                          <div class="audio-container" (click)="$event.stopPropagation()">
+                            <span class="audio-label">🎵 Audio Attachment</span>
+                            <audio [src]="getAbsoluteMediaUrl(url)" controls class="post-audio"></audio>
+                          </div>
+                        } @else {
+                          <img [src]="getAbsoluteMediaUrl(url)" alt="Post attachment" class="post-image" />
+                        }
+                      </div>
+                    }
+                  </div>
+                }
               }
 
-              <!-- Premium Social Action Row -->
+              <!-- 4. SOCIAL ACTIONS ROW (Always rendered) -->
               <div class="post-social-actions">
                 <button type="button" 
                         class="social-btn comment-btn" 
                         [class.active]="isCommentsOpen(post.postId)"
-                        (click)="toggleComments(post.postId)"
+                        (click)="toggleComments(post.postId); $event.stopPropagation()"
                         title="Comment">
                   <svg class="social-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
@@ -194,24 +291,43 @@
                   <span class="social-count">{{ getRepliesCount(post) }}</span>
                 </button>
 
-                <button type="button" 
-                        class="social-btn retweet-btn" 
-                        [class.active]="isRetweeted(post.postId)"
-                        (click)="toggleRetweet(post)"
-                        title="Retweet">
-                  <svg class="social-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="17 1 21 5 17 9"/>
-                    <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
-                    <polyline points="7 23 3 19 7 15"/>
-                    <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
-                  </svg>
-                  <span class="social-count">{{ getRetweetsCount(post) }}</span>
-                </button>
+                <div class="retweet-btn-wrapper" (click)="$event.stopPropagation()">
+                  <button type="button" 
+                          class="social-btn retweet-btn" 
+                          [class.active]="isRetweeted(post.postId)"
+                          (click)="toggleRetweetMenu(post.postId, $event)"
+                          title="Retweet">
+                    <svg class="social-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="17 1 21 5 17 9"/>
+                      <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+                      <polyline points="7 23 3 19 7 15"/>
+                      <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+                    </svg>
+                    <span class="social-count">{{ getRetweetsCount(post) }}</span>
+                  </button>
+
+                  @if (activeRetweetMenu() === post.postId) {
+                    <div class="retweet-dropdown-menu" (click)="$event.stopPropagation()">
+                      <button type="button" class="dropdown-item" (click)="directRetweet(post)">
+                        <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+                        </svg>
+                        <span>Retweet</span>
+                      </button>
+                      <button type="button" class="dropdown-item" (click)="openQuoteModal(post)">
+                        <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        </svg>
+                        <span>Quote Tweet</span>
+                      </button>
+                    </div>
+                  }
+                </div>
 
                 <button type="button" 
                         class="social-btn like-btn" 
                         [class.active]="isLiked(post.postId)"
-                        (click)="toggleLike(post)"
+                        (click)="toggleLike(post); $event.stopPropagation()"
                         title="Like">
                   <svg class="social-icon" viewBox="0 0 24 24" [attr.fill]="isLiked(post.postId) ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2">
                     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
@@ -219,7 +335,7 @@
                   <span class="social-count">{{ getLikesCount(post) }}</span>
                 </button>
 
-                <div class="social-btn view-btn" title="Views">
+                <div class="social-btn view-btn" title="Views" (click)="$event.stopPropagation()">
                   <svg class="social-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/>
                     <circle cx="12" cy="12" r="3"/>
@@ -228,9 +344,9 @@
                 </div>
               </div>
 
-              <!-- Collapsible Comment Section (Drawer) -->
+              <!-- 5. COLLAPSIBLE COMMENTS SECTION (Always rendered) -->
               @if (isCommentsOpen(post.postId)) {
-                <div class="comments-drawer">
+                <div class="comments-drawer" (click)="$event.stopPropagation()">
                   <div class="comment-composer">
                     <input #newCommentInput 
                            type="text" 
@@ -244,15 +360,25 @@
                   </div>
 
                   <div class="comments-list">
-                    @for (comment of getComments(post.postId); track comment.id) {
-                      <div class="comment-item">
-                        <div class="comment-avatar">{{ comment.initials }}</div>
+                    @for (reply of getPostReplies(post.postId); track reply.postId) {
+                      <div class="comment-item" (click)="openDetailModal(reply); $event.stopPropagation()">
+                        <div class="comment-avatar">{{ authorInitials(reply) }}</div>
                         <div class="comment-content">
                           <div class="comment-meta">
-                            <strong>{{ comment.author }}</strong>
-                            <span>@{{ comment.author.toLowerCase() }} · {{ comment.time }}</span>
+                            <strong>{{ authorName(reply) }}</strong>
+                            <span>{{ authorHandle(reply) }} · {{ (reply.createdAt | date: 'shortTime') || 'Just now' }}</span>
                           </div>
-                          <p class="comment-text">{{ comment.text }}</p>
+                          <p class="comment-text">{{ reply.content }}</p>
+
+                          @if (reply.mediaUrls && reply.mediaUrls.length) {
+                            <div class="post-media-grid small-comments-media">
+                              @for (url of reply.mediaUrls; track url) {
+                                <div class="post-media-item">
+                                  <img [src]="getAbsoluteMediaUrl(url)" alt="Comment attachment" class="post-image" />
+                                </div>
+                              }
+                            </div>
+                          }
                         </div>
                       </div>
                     } @empty {
@@ -262,12 +388,13 @@
                 </div>
               }
 
+              <!-- 6. FOOTER/ACTIONS ROW (Always rendered) -->
               <div class="post-footer">
                 <div class="post-health">
                   <span>{{ post.reportCount ?? 0 }} reports</span>
                 </div>
 
-                <div class="table-actions">
+                <div class="table-actions" (click)="$event.stopPropagation()">
                   <button type="button" class="secondary-action small-action" (click)="inspect(post.postId)">Open by id</button>
                   <button type="button" class="secondary-action small-action" (click)="startEdit(post)">Edit</button>
                   <button type="button" class="secondary-action small-action" (click)="toggleStatus(post)">
@@ -276,7 +403,8 @@
                   <button type="button" class="danger-action small-action" (click)="remove(post.postId)">Delete</button>
                 </div>
               </div>
-            </div>
+
+            </div> <!-- END post-body -->
           </article>
         }
       </div>
@@ -293,5 +421,277 @@
       </header>
       <pre class="json-view">{{ post | json }}</pre>
     </section>
+  }
+
+  <!-- Premium Glassmorphic Quote Modal Overlay -->
+  @if (isQuoteModalOpen() && postToQuote(); as quoteTarget) {
+    <div class="modal-backdrop" (click)="closeQuoteModal()">
+      <div class="modal-container surface-card" (click)="$event.stopPropagation()">
+        <header class="modal-header">
+          <h3>Quote Tweet</h3>
+          <button type="button" class="close-modal-btn" (click)="closeQuoteModal()">&times;</button>
+        </header>
+
+        <form [formGroup]="quoteForm" (ngSubmit)="submitQuoteTweet()" class="stack">
+          <label class="field">
+            <span>Add a comment</span>
+            <textarea 
+              rows="3" 
+              formControlName="content" 
+              placeholder="Add a comment to this shared post..." 
+              #quoteTextarea></textarea>
+          </label>
+
+          <!-- Character Counter Alert -->
+          <div class="character-count-row">
+            <span class="char-counter" [class.alert]="(quoteForm.get('content')?.value?.length ?? 0) > 240" [class.error]="(quoteForm.get('content')?.value?.length ?? 0) > 280">
+              {{ quoteForm.get('content')?.value?.length || 0 }} / 280
+            </span>
+          </div>
+
+          <!-- Preview of the Quoted Post -->
+          <div class="quoted-post-preview">
+            <header class="nested-quote-meta">
+              <div class="nested-quote-avatar">{{ authorInitials(quoteTarget) }}</div>
+              <strong>{{ authorName(quoteTarget) }}</strong>
+              <span>{{ authorHandle(quoteTarget) }}</span>
+            </header>
+            <p class="nested-quote-content">{{ quoteTarget.content }}</p>
+          </div>
+
+          <div class="button-row">
+            <button type="submit" class="primary-action" [disabled]="quoteForm.invalid">
+              Share Quote
+            </button>
+            <button type="button" class="secondary-action" (click)="closeQuoteModal()">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+  <!-- Floating Compose Action Button -->
+  <button type="button" class="floating-compose-btn" (click)="openComposeModal()" title="Compose Post">
+    <svg class="compose-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25">
+      <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+    </svg>
+  </button>
+
+  <!-- Compose Post Modal Overlay -->
+  @if (isComposeModalOpen()) {
+    <div class="modal-backdrop" (click)="closeComposeModal()">
+      <div class="modal-container surface-card composer-modal" (click)="$event.stopPropagation()">
+        <header class="modal-header">
+          <h3>Create Post</h3>
+          <button type="button" class="close-modal-btn" (click)="closeComposeModal()">&times;</button>
+        </header>
+
+        <form class="stack" [formGroup]="form" (ngSubmit)="submit()">
+          <label class="field">
+            <span>Content</span>
+            <textarea rows="4" formControlName="content" placeholder="What's worth posting today?"></textarea>
+          </label>
+
+          <div class="composer-media-section stack">
+            <div class="attachment-triggers">
+              <button type="button" class="attachment-btn" (click)="triggerFileInput('image/*')">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                <span>Image</span>
+               </button>
+              <button type="button" class="attachment-btn" (click)="triggerFileInput('audio/*')">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+                <span>Audio</span>
+              </button>
+              <button type="button" class="attachment-btn" (click)="triggerFileInput('video/*')">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+                <span>Video</span>
+              </button>
+              @if (uploadingFile()) {
+                <span class="uploading-spinner">Uploading...</span>
+              }
+            </div>
+
+            @if (attachments().length) {
+              <div class="attachment-previews">
+                @for (att of attachments(); track att.mediaId; let i = $index) {
+                  <div class="attachment-preview-card">
+                    @if (att.type === 'image') {
+                      <img [src]="att.url" alt="Image preview" />
+                    } @else if (att.type === 'audio') {
+                      <div class="audio-preview-container">
+                        <span class="music-icon">🎵</span>
+                         <audio [src]="att.url" controls></audio>
+                      </div>
+                    } @else if (att.type === 'video') {
+                      <video [src]="att.url" controls class="video-preview"></video>
+                    } @else {
+                      <span class="attachment-name">📎 Attachment {{ i + 1 }}</span>
+                    }
+                    <button type="button" class="remove-attachment-btn" (click)="removeAttachment(i)" title="Remove attachment">
+                      &times;
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          <label class="checkbox-field">
+            <input type="checkbox" formControlName="isPublished" />
+            <span>Publish immediately</span>
+          </label>
+
+          <div class="button-row">
+            <button type="submit" class="primary-action" [disabled]="saving()">
+              {{ saving() ? 'Saving...' : 'Create post' }}
+            </button>
+            <button type="button" class="secondary-action" (click)="closeComposeModal()">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- Premium Glassmorphic Tweet Detail Modal (Lightbox) -->
+  @if (isDetailModalOpen() && postInDetail(); as detailPost) {
+    <div class="modal-backdrop detail-lightbox-backdrop" (click)="closeDetailModal()">
+      <div class="modal-container surface-card detail-modal-container" (click)="$event.stopPropagation()">
+        <header class="modal-header">
+          <h3>Post Details</h3>
+          <button type="button" class="close-modal-btn" (click)="closeDetailModal()">&times;</button>
+        </header>
+
+        <div class="detail-post-wrapper scrollable-content">
+          <article class="detail-post-card">
+            <header class="detail-post-header">
+              <div class="post-avatar large-avatar" aria-hidden="true">{{ authorInitials(detailPost) }}</div>
+              <div class="detail-author-meta">
+                <strong>{{ authorName(detailPost) }}</strong>
+                <p>{{ authorHandle(detailPost) }}</p>
+              </div>
+            </header>
+
+            <p class="detail-post-content">{{ detailPost.content || 'No content returned by the API.' }}</p>
+
+            <!-- Full-width Detail Media Box -->
+            @if (detailPost.mediaUrls && detailPost.mediaUrls.length) {
+              <div class="detail-media-container">
+                @for (url of detailPost.mediaUrls; track url) {
+                  <div class="detail-media-item">
+                    @if (getMediaType(url) === 'video') {
+                      <video [src]="getAbsoluteMediaUrl(url)" controls class="detail-video"></video>
+                    } @else if (getMediaType(url) === 'audio') {
+                      <div class="audio-container">
+                        <span class="audio-label">🎵 Audio Attachment</span>
+                        <audio [src]="getAbsoluteMediaUrl(url)" controls class="post-audio"></audio>
+                      </div>
+                    } @else {
+                      <img [src]="getAbsoluteMediaUrl(url)" alt="Detail post attachment" class="detail-image" />
+                    }
+                  </div>
+                }
+              </div>
+            }
+
+            <div class="detail-timestamp-row">
+              <span>{{ (detailPost.createdAt | date: 'long') || 'No timestamp' }}</span>
+            </div>
+
+            <!-- Interaction counters bar -->
+            <div class="detail-stats-bar">
+              <span class="stat-item"><strong>{{ getRepliesCount(detailPost) }}</strong> Replies</span>
+              <span class="stat-item"><strong>{{ getRetweetsCount(detailPost) }}</strong> Retweets</span>
+              <span class="stat-item"><strong>{{ getLikesCount(detailPost) }}</strong> Likes</span>
+            </div>
+
+            <!-- Large Action Row -->
+            <div class="post-social-actions detail-actions">
+              <button type="button" 
+                      class="social-btn comment-btn" 
+                      title="Reply">
+                <svg class="social-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                </svg>
+              </button>
+
+              <div class="retweet-btn-wrapper" (click)="$event.stopPropagation()">
+                <button type="button" 
+                        class="social-btn retweet-btn" 
+                        [class.active]="isRetweeted(detailPost.postId)"
+                        (click)="toggleRetweetMenu(detailPost.postId, $event)"
+                        title="Retweet">
+                  <svg class="social-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="17 1 21 5 17 9"/>
+                    <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+                    <polyline points="7 23 3 19 7 15"/>
+                    <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+                  </svg>
+                </button>
+
+                @if (activeRetweetMenu() === detailPost.postId) {
+                  <div class="retweet-dropdown-menu" (click)="$event.stopPropagation()">
+                    <button type="button" class="dropdown-item" (click)="directRetweet(detailPost)">
+                      <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+                      </svg>
+                      <span>Retweet</span>
+                    </button>
+                    <button type="button" class="dropdown-item" (click)="openQuoteModal(detailPost)">
+                      <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                      </svg>
+                      <span>Quote Tweet</span>
+                    </button>
+                  </div>
+                }
+              </div>
+
+              <button type="button" 
+                      class="social-btn like-btn" 
+                      [class.active]="isLiked(detailPost.postId)"
+                      (click)="toggleLike(detailPost)"
+                      title="Like">
+                <svg class="social-icon" viewBox="0 0 24 24" [attr.fill]="isLiked(detailPost.postId) ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Comments thread inside detail lightbox -->
+            <div class="detail-comments-drawer" (click)="$event.stopPropagation()">
+              <div class="comment-composer">
+                <input #detailCommentInput 
+                       type="text" 
+                       placeholder="Post your reply..." 
+                       (keyup.enter)="addComment(detailPost.postId, detailCommentInput.value); detailCommentInput.value = ''" />
+                <button type="button" 
+                        class="reply-action-btn"
+                        (click)="addComment(detailPost.postId, detailCommentInput.value); detailCommentInput.value = ''">
+                  Reply
+                </button>
+              </div>
+
+              <div class="comments-list">
+                @for (reply of getPostReplies(detailPost.postId); track reply.postId) {
+                  <div class="comment-item" (click)="openDetailModal(reply); $event.stopPropagation()">
+                    <div class="comment-avatar">{{ authorInitials(reply) }}</div>
+                    <div class="comment-content">
+                      <div class="comment-meta">
+                        <strong>{{ authorName(reply) }}</strong>
+                        <span>{{ authorHandle(reply) }} · {{ (reply.createdAt | date: 'shortTime') || 'Just now' }}</span>
+                      </div>
+                      <p class="comment-text">{{ reply.content }}</p>
+                    </div>
+                  </div>
+                } @empty {
+                  <p class="no-comments-msg">Be the first to reply to this post!</p>
+                }
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
   }
 </section>
