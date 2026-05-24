@@ -4,13 +4,12 @@ import { firstValueFrom } from 'rxjs';
 
 import { getErrorMessage } from '../../../../core/api/api.utils';
 import { FeedbackService } from '../../../../core/ui/feedback.service';
-import { StateCardComponent } from '../../../../shared/components/state-card/state-card.component';
 import { UsersApiService } from '../../../users/users-api.service';
 
 @Component({
   selector: 'app-settings-password-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, StateCardComponent],
+  imports: [ReactiveFormsModule],
   templateUrl: './settings-password.page.html',
   styleUrl: './settings-password.page.scss',
 })

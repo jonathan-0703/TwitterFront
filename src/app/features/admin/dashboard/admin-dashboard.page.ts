@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { JsonPipe } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
 
 import { getErrorMessage } from '../../../core/api/api.utils';
@@ -11,7 +10,7 @@ import { AdminDashboardStats } from '../admin.models';
 @Component({
   selector: 'app-admin-dashboard-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [JsonPipe, StateCardComponent],
+  imports: [StateCardComponent],
   templateUrl: './admin-dashboard.page.html',
   styleUrl: './admin-dashboard.page.scss',
 })

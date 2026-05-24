@@ -1,4 +1,4 @@
-import { DatePipe, JsonPipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
@@ -15,7 +15,7 @@ type ReportHistoryFilter = 'all' | 'pending' | 'resolved' | 'dismissed';
 @Component({
   selector: 'app-admin-reports-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, JsonPipe, ReactiveFormsModule, StateCardComponent],
+  imports: [DatePipe, ReactiveFormsModule, StateCardComponent],
   templateUrl: './admin-reports.page.html',
   styleUrl: './admin-reports.page.scss',
 })

@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { JsonPipe } from '@angular/common';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 
@@ -13,7 +12,7 @@ import { AdminPostRecord } from '../admin.models';
 @Component({
   selector: 'app-admin-posts-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [JsonPipe, ReactiveFormsModule, StateCardComponent],
+  imports: [ReactiveFormsModule, StateCardComponent],
   templateUrl: './admin-posts.page.html',
   styleUrl: './admin-posts.page.scss',
 })

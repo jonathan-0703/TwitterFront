@@ -1,4 +1,3 @@
-import { JsonPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
@@ -13,7 +12,7 @@ import { AdminConfigEntry } from '../admin.models';
 @Component({
   selector: 'app-admin-config-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [JsonPipe, ReactiveFormsModule, StateCardComponent],
+  imports: [ReactiveFormsModule, StateCardComponent],
   templateUrl: './admin-config.page.html',
   styleUrl: './admin-config.page.scss',
 })

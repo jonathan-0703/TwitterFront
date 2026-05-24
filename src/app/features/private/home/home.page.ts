@@ -1,4 +1,4 @@
-import { DatePipe, JsonPipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, ElementRef, HostListener, computed, effect, inject, signal, viewChildren } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -30,7 +30,7 @@ type MediaType = MediaAttachment['type'];
 @Component({
   selector: 'app-home-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, JsonPipe, ReactiveFormsModule, StateCardComponent, UserAvatarComponent, AudioRecorderModalComponent, AudioPlayerComponent, MediaUrlPipe],
+  imports: [DatePipe, ReactiveFormsModule, StateCardComponent, UserAvatarComponent, AudioRecorderModalComponent, AudioPlayerComponent, MediaUrlPipe],
   templateUrl: './home.page.html',
   styleUrl: './home.page.scss',
 })
