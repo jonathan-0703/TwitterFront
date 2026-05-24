@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiBaseUrl: 'https://twitter-aioa.onrender.com',
+  apiBaseUrl: '162.159.140.98',
 } as const;
