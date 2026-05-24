@@ -8,6 +8,7 @@ import { firstValueFrom } from 'rxjs';
 import { getErrorMessage } from '../../../core/api/api.utils';
 import { SessionService } from '../../../core/auth/session.service';
 import { ConfirmService } from '../../../core/ui/confirm.service';
+import { MediaUrlPipe } from '../../../core/ui/media-url.pipe';
 import { StateCardComponent } from '../../../shared/components/state-card/state-card.component';
 import { AudioPlayerComponent } from '../../posts/audio-player.component';
 import { AudioRecorderModalComponent } from '../../posts/audio-recorder-modal.component';
@@ -30,7 +31,7 @@ type MediaType = MediaAttachment['type'];
 @Component({
   selector: 'app-home-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, JsonPipe, ReactiveFormsModule, StateCardComponent, UserAvatarComponent, AudioRecorderModalComponent, AudioPlayerComponent],
+  imports: [DatePipe, JsonPipe, ReactiveFormsModule, StateCardComponent, UserAvatarComponent, AudioRecorderModalComponent, AudioPlayerComponent, MediaUrlPipe],
   templateUrl: './home.page.html',
   styleUrl: './home.page.scss',
 })

@@ -179,18 +179,18 @@
                               @if (getMediaType(url) === 'video') {
                                 <video
                                   #feedVideo
-                                  [attr.src]="isFeedVideoLoaded(getAbsoluteMediaUrl(url)) ? getAbsoluteMediaUrl(url) : null"
-                                  [attr.data-media-url]="getAbsoluteMediaUrl(url)"
+                                  [attr.src]="isFeedVideoLoaded(url | mediaUrl) ? (url | mediaUrl) : null"
+                                  [attr.data-media-url]="url | mediaUrl"
                                   controls
                                   preload="none"
                                   playsinline
                                   class="post-video"></video>
                               } @else if (getMediaType(url) === 'audio') {
                                 <div class="audio-container" (click)="$event.stopPropagation()">
-                                  <app-audio-player [src]="getAbsoluteMediaUrl(url)" />
+                                  <app-audio-player [src]="url | mediaUrl" />
                                 </div>
                               } @else {
-                                <img [src]="getAbsoluteMediaUrl(url)" alt="Adjunto de la publicación compartida" class="post-image" />
+                                <img [src]="url | mediaUrl" alt="Adjunto de la publicación compartida" class="post-image" />
                               }
                             </div>
                           }
@@ -260,18 +260,18 @@
                                     @if (getMediaType(url) === 'video') {
                                       <video
                                         #feedVideo
-                                        [attr.src]="isFeedVideoLoaded(getAbsoluteMediaUrl(url)) ? getAbsoluteMediaUrl(url) : null"
-                                        [attr.data-media-url]="getAbsoluteMediaUrl(url)"
+                                        [attr.src]="isFeedVideoLoaded(url | mediaUrl) ? (url | mediaUrl) : null"
+                                        [attr.data-media-url]="url | mediaUrl"
                                         controls
                                         preload="none"
                                         playsinline
                                         class="post-video"></video>
                                     } @else if (getMediaType(url) === 'audio') {
                                       <div class="audio-container" (click)="$event.stopPropagation()">
-                                        <app-audio-player [src]="getAbsoluteMediaUrl(url)" />
+                                        <app-audio-player [src]="url | mediaUrl" />
                                       </div>
                                     } @else {
-                                      <img [src]="getAbsoluteMediaUrl(url)" alt="Adjunto de la publicación compartida" class="post-image" />
+                                      <img [src]="url | mediaUrl" alt="Adjunto de la publicación compartida" class="post-image" />
                                     }
                                   </div>
                                 }
@@ -309,18 +309,18 @@
                             @if (getMediaType(url) === 'video') {
                               <video
                                 #feedVideo
-                                [attr.src]="isFeedVideoLoaded(getAbsoluteMediaUrl(url)) ? getAbsoluteMediaUrl(url) : null"
-                                [attr.data-media-url]="getAbsoluteMediaUrl(url)"
+                                [attr.src]="isFeedVideoLoaded(url | mediaUrl) ? (url | mediaUrl) : null"
+                                [attr.data-media-url]="url | mediaUrl"
                                 controls
                                 preload="none"
                                 playsinline
                                 class="post-video"></video>
                             } @else if (getMediaType(url) === 'audio') {
                               <div class="audio-container" (click)="$event.stopPropagation()">
-                                <app-audio-player [src]="getAbsoluteMediaUrl(url)" />
+                                <app-audio-player [src]="url | mediaUrl" />
                               </div>
                             } @else {
-                              <img [src]="getAbsoluteMediaUrl(url)" alt="Adjunto de la publicación" class="post-image" />
+                              <img [src]="url | mediaUrl" alt="Adjunto de la publicación" class="post-image" />
                             }
                           </div>
                         }
@@ -441,7 +441,7 @@
                             <div class="post-media-grid small-comments-media">
                               @for (url of reply.mediaUrls; track url) {
                                 <div class="post-media-item">
-                                  <img [src]="getAbsoluteMediaUrl(url)" alt="Adjunto del comentario" class="post-image" />
+                                  <img [src]="url | mediaUrl" alt="Adjunto del comentario" class="post-image" />
                                 </div>
                               }
                             </div>
@@ -642,13 +642,13 @@
                   @for (url of detailPost.mediaUrls; track url; let idx = $index) {
                     <div class="carousel-item" [class.audio-item]="getMediaType(url) === 'audio'" [class.is-active]="idx === getCarouselIndex(detailPost.postId)" [attr.aria-hidden]="idx === getCarouselIndex(detailPost.postId) ? 'false' : 'true'">
                       @if (getMediaType(url) === 'video') {
-                        <video [src]="getAbsoluteMediaUrl(url)" controls class="detail-video"></video>
+                        <video [src]="url | mediaUrl" controls class="detail-video"></video>
                       } @else if (getMediaType(url) === 'audio') {
                         <div class="audio-container">
-                          <app-audio-player [src]="getAbsoluteMediaUrl(url)" />
+                          <app-audio-player [src]="url | mediaUrl" />
                         </div>
                       } @else {
-                        <img [src]="getAbsoluteMediaUrl(url)" alt="Adjunto del detalle" class="detail-image" />
+                        <img [src]="url | mediaUrl" alt="Adjunto del detalle" class="detail-image" />
                       }
                     </div>
                   }
@@ -914,3 +914,4 @@
     <app-audio-recorder-modal (audioReady)="onAudioReady($event)" (closed)="closeRecorder()" />
   }
 </section>
+
