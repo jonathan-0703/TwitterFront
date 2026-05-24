@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiBaseUrl: 'https://backtwitter-app-68mcd.ondigitalocean.app',
+  apiBaseUrl: '/api',
 } as const;
