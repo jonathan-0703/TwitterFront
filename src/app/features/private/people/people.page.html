@@ -29,7 +29,9 @@
         <p>{{ user.biography || 'Sin biografía.' }}</p>
         <div class="spotlight-meta">
           @if (statusLabel(user) !== 'Activo') {
-            <span class="chip" [class.warn]="statusLabel(user) !== 'Verificado'">{{ statusLabel(user) }}</span>
+            <span class="chip" [class.warn]="statusLabel(user) !== 'Verificado'">{{
+              statusLabel(user)
+            }}</span>
           }
         </div>
       } @else {
@@ -51,15 +53,30 @@
     <header class="section-head">
       <div>
         <h2>Comunidad</h2>
-        <p>{{ loading() ? 'Cargando…' : directory().length + ' ' + (directory().length === 1 ? 'persona' : 'personas') }}</p>
+        <p>
+          {{
+            loading()
+              ? 'Cargando…'
+              : directory().length + ' ' + (directory().length === 1 ? 'persona' : 'personas')
+          }}
+        </p>
       </div>
 
-      <button type="button" class="secondary-action small-action" (click)="reload()">Actualizar</button>
+      <button type="button" class="secondary-action small-action" (click)="reload()">
+        Actualizar
+      </button>
     </header>
 
     <div class="search-bar" role="search">
       <span class="search-bar-icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <circle cx="11" cy="11" r="7" />
           <line x1="21" y1="21" x2="16.65" y2="16.65" />
         </svg>
@@ -73,10 +90,17 @@
         autocomplete="off"
       />
       @if (hasActiveSearch()) {
-        <button type="button" class="search-bar-clear" (click)="clearSearch()" aria-label="Limpiar búsqueda">×</button>
+        <button
+          type="button"
+          class="search-bar-clear"
+          (click)="clearSearch()"
+          aria-label="Limpiar búsqueda"
+        >
+          ×
+        </button>
       }
     </div>
-    <br>
+    <br />
     @if (loading() && !users().length) {
       <app-state-card
         tone="loading"
@@ -113,7 +137,9 @@
               </div>
 
               @if (statusLabel(user) !== 'Activo') {
-                <span class="chip" [class.warn]="statusLabel(user) !== 'Verificado'">{{ statusLabel(user) }}</span>
+                <span class="chip" [class.warn]="statusLabel(user) !== 'Verificado'">{{
+                  statusLabel(user)
+                }}</span>
               }
             </div>
 
@@ -124,8 +150,17 @@
             </div>
 
             <div class="table-actions">
-              <a class="inline-link" [routerLink]="['/profile', user.userId || 'unknown']">Ver perfil</a>
-              <button type="button" class="secondary-action small-action" (click)="inspect(user)">Detalles</button>
+              <a class="inline-link" [routerLink]="['/profile', user.userId || 'unknown']"
+                >Ver perfil</a
+              >
+
+              @if (user.userId && !isSelf(user.userId)) {
+                <app-send-message-button [userId]="user.userId" />
+              }
+
+              <button type="button" class="secondary-action small-action" (click)="inspect(user)">
+                Detalles
+              </button>
               @if (canDeleteUsers() && user.userId && !isSelf(user.userId)) {
                 <button
                   type="button"
@@ -160,7 +195,7 @@
         </article>
         <article class="fact-card">
           <span>Roles</span>
-          <strong>{{ ((user.roles ?? []).join(', ')) || 'Usuario' }}</strong>
+          <strong>{{ (user.roles ?? []).join(', ') || 'Usuario' }}</strong>
         </article>
         <article class="fact-card">
           <span>Se unió</span>
@@ -173,7 +208,9 @@
       </div>
 
       <div class="table-actions">
-        <a class="primary-action" [routerLink]="['/profile', user.userId || 'unknown']">Abrir perfil completo</a>
+        <a class="primary-action" [routerLink]="['/profile', user.userId || 'unknown']"
+          >Abrir perfil completo</a
+        >
       </div>
     </section>
   }

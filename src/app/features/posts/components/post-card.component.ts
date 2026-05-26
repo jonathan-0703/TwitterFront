@@ -2,14 +2,15 @@ import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, ViewEncapsulation, computed, inject, input, output, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
-import { MediaUrlPipe } from '../../core/ui/media-url.pipe';
-import { PostActionsComponent } from '../private/home/components/post-actions/post-actions.component';
-import { PostMediaCarouselComponent } from '../private/home/components/post-media-carousel/post-media-carousel.component';
-import { UserAvatarComponent } from '../users/user-avatar.component';
-import { UserDto } from '../users/users.models';
-import { PostsApiService } from './posts-api.service';
-import { PostStoreService } from './post-store.service';
-import { PostDto } from './posts.models';
+import { MediaUrlPipe } from '../../../core/ui/media-url.pipe';
+import { PostActionsComponent } from '../../private/home/components/post-actions/post-actions.component';
+import { PostMediaCarouselComponent } from '../../private/home/components/post-media-carousel/post-media-carousel.component';
+import { UserAvatarComponent } from '../../users/components/user-avatar.component';
+import { PostStoreService } from '../services/post-store.service';
+import { PostsApiService } from '../services/posts-api.service';
+import { PostDto } from '../models/posts.models';
+import { UserDto } from '../../users/models/users.models';
+
 
 @Component({
   selector: 'app-post-card',

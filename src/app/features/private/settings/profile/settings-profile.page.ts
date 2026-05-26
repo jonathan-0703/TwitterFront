@@ -3,8 +3,8 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } 
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { StateCardComponent } from '../../../../shared/components/state-card/state-card.component';
-import { UserAvatarComponent } from '../../../users/user-avatar.component';
-import { UserStoreService } from '../../../users/user-store.service';
+import { UserAvatarComponent } from '../../../users/components/user-avatar.component';
+import { UserStoreService } from '../../../users/services/user-store.service';
 
 @Component({
   selector: 'app-settings-profile-page',

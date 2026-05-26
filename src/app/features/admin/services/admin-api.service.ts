@@ -1,25 +1,11 @@
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { ApiClientService } from '../../../core/api/api-client.service';
+import { AdminConfigEntry, AdminDashboardStats, AdminPostRecord, AdminReportDto, AdminUserRecord, AssignReportRequest, AuditLogEntry, ChangeUserRoleRequest, CreateReportRequest, FlagPostRequest, LiftSuspensionRequest, ResolveReportRequest, SuspendUserRequest, SuspensionDto, UpdateConfigRequest } from '../models/admin.models';
+import { JsonRecord } from '../../../core/api/api.models';
 
-import { ApiClientService } from '../../core/api/api-client.service';
-import { JsonRecord } from '../../core/api/api.models';
-import {
-  AdminConfigEntry,
-  AdminDashboardStats,
-  AdminPostRecord,
-  AdminReportDto,
-  AdminUserRecord,
-  AssignReportRequest,
-  AuditLogEntry,
-  ChangeUserRoleRequest,
-  CreateReportRequest,
-  FlagPostRequest,
-  LiftSuspensionRequest,
-  ResolveReportRequest,
-  SuspendUserRequest,
-  SuspensionDto,
-  UpdateConfigRequest,
-} from './admin.models';
+
+
 
 @Injectable({ providedIn: 'root' })
 export class AdminApiService {
@@ -58,6 +44,7 @@ export class AdminApiService {
   }
 
   listPosts(): Observable<AdminPostRecord[]> {
+
     return this.api.get<AdminPostRecord[]>('/api/admin/posts/list');
   }
 
@@ -74,6 +61,7 @@ export class AdminApiService {
   }
 
   getPendingReports(): Observable<AdminReportDto[]> {
+
     return this.api.get<AdminReportDto[]>('/api/admin/reports/pending');
   }
 

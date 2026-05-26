@@ -6,8 +6,8 @@ import { adminRoles } from '../../auth/session.model';
 import { FeedbackService } from '../../ui/feedback.service';
 import { AccentPickerComponent } from '../../ui/accent-picker.component';
 import { ThemeToggleComponent } from '../../ui/theme-toggle.component';
-import { UserAvatarComponent } from '../../../features/users/user-avatar.component';
-import { UserStoreService } from '../../../features/users/user-store.service';
+import { UserAvatarComponent } from '../../../features/users/components/user-avatar.component';
+import { UserStoreService } from '../../../features/users/services/user-store.service';
 
 @Component({
   selector: 'app-private-layout',

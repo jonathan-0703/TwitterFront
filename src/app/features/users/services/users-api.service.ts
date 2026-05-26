@@ -3,10 +3,10 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs';
 
-import { ApiClientService } from '../../core/api/api-client.service';
-import { GenericResponse, JsonRecord } from '../../core/api/api.models';
-import { environment } from '../../../environments/environment';
-import { ChangePasswordRequest, RegisterUserRequest, TestEmailRequest, UpdateUserRequest, UserDto, UserListQuery } from './users.models';
+import { ApiClientService } from '../../../core/api/api-client.service';
+import { environment } from '../../../../environments/environment';
+import { GenericResponse, JsonRecord } from '../../../core/api/api.models';
+import { ChangePasswordRequest, RegisterUserRequest, TestEmailRequest, UpdateUserRequest, UserDto, UserListQuery } from '../models/users.models';
 
 @Injectable({ providedIn: 'root' })
 export class UsersApiService {

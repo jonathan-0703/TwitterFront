@@ -1,11 +1,11 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
-import { getErrorMessage } from '../../core/api/api.utils';
-import { SessionService } from '../../core/auth/session.service';
-import { FeedbackService } from '../../core/ui/feedback.service';
+import { getErrorMessage } from '../../../core/api/api.utils';
+import { SessionService } from '../../../core/auth/session.service';
+import { FeedbackService } from '../../../core/ui/feedback.service';
 import { PostsApiService } from './posts-api.service';
-import { PostDto, SavePostRequest } from './posts.models';
+import { PostDto, SavePostRequest } from '../models/posts.models';
 
 @Injectable({ providedIn: 'root' })
 export class PostStoreService {
@@ -133,7 +133,7 @@ export class PostStoreService {
     // Optimistically update
     this.likedPostsState.update(prev => ({ ...prev, [postId]: !wasLiked }));
     this.persistInteractions();
-    
+
     this.postsState.update(posts =>
       posts.map(p => {
         if (p.postId === postId) {
@@ -153,7 +153,7 @@ export class PostStoreService {
       // Revert on failure
       this.likedPostsState.update(prev => ({ ...prev, [postId]: wasLiked }));
       this.persistInteractions();
-      
+
       this.postsState.update(posts =>
         posts.map(p => {
           if (p.postId === postId) {
@@ -171,7 +171,7 @@ export class PostStoreService {
       const response = await firstValueFrom(this.postsApi.createComment(postId, { content }));
       if (response) {
         this.postsState.update(posts => [response, ...posts]);
-        
+
         // Increment the parent replies count locally
         this.postsState.update(posts =>
           posts.map(p => {
@@ -222,7 +222,7 @@ export class PostStoreService {
     if (!retweetId) {
       // Fallback: try to find the retweet in current posts
       const userId = this.sessionService.userId();
-      const found = this.postsState().find(p => 
+      const found = this.postsState().find(p =>
         p.retweetOfPostId === postId && p.userId === userId && !p.content
       );
       if (!found?.postId) {
@@ -231,7 +231,7 @@ export class PostStoreService {
       }
     }
 
-    const idToDelete = retweetId || this.postsState().find(p => 
+    const idToDelete = retweetId || this.postsState().find(p =>
       p.retweetOfPostId === postId && p.userId === this.sessionService.userId() && !p.content
     )?.postId;
 
@@ -241,7 +241,7 @@ export class PostStoreService {
       this.savingState.set(true);
       this.errorState.set(null);
       await firstValueFrom(this.postsApi.deletePost(idToDelete));
-      
+
       this.postsState.update(posts => posts.filter(p => p.postId !== idToDelete));
       this.retweetedPostsState.update(prev => {
         const next = { ...prev };

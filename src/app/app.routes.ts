@@ -46,6 +46,14 @@ export const routes: Routes = [
         loadComponent: () => import('./features/private/people/people.page').then((module) => module.PeoplePage),
       },
       {
+        path: 'messages',
+        loadComponent: () => import('./features/messages/pages/messages.page').then((module) => module.MessagesPage),
+      },
+      {
+        path: 'follows/:id',
+        loadComponent: () => import('./features/follows/pages/follows-list.page').then((module) => module.FollowsPage),
+      },
+      {
         path: 'settings/profile',
         loadComponent: () =>
           import('./features/private/settings/profile/settings-profile.page').then(

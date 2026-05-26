@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 
-import { AudioPlayerComponent } from '../../../../posts/audio-player.component';
+import { AudioPlayerComponent } from '../../../../posts/components/audio-player.component';
 import type { MediaAttachment } from '../../home.page';
 
 @Component({

@@ -1,27 +1,34 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from '@angular/core';
 import { AbstractControl, NonNullableFormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { getErrorMessage } from '../../../core/api/api.utils';
 import { ConfirmService } from '../../../core/ui/confirm.service';
 import { FeedbackService } from '../../../core/ui/feedback.service';
 import { StateCardComponent } from '../../../shared/components/state-card/state-card.component';
-import { PostDto } from '../../posts/posts.models';
-import { PostStoreService } from '../../posts/post-store.service';
-import { UserAvatarComponent } from '../../users/user-avatar.component';
-import { UserStoreService } from '../../users/user-store.service';
-import { UsersApiService } from '../../users/users-api.service';
-import { UserDto } from '../../users/users.models';
-import { PostCardComponent } from '../../posts/post-card.component';
+
+import { PostStoreService } from '../../posts/services/post-store.service';
+import { UserAvatarComponent } from '../../users/components/user-avatar.component';
+import { UserStoreService } from '../../users/services/user-store.service';
+
+import { PostCardComponent } from '../../posts/components/post-card.component';
 import { PostMediaCarouselComponent } from '../home/components/post-media-carousel/post-media-carousel.component';
 import { environment } from '../../../../environments/environment';
-import { PostsApiService } from '../../posts/posts-api.service';
+import { FollowButtonComponent } from '../../follows/components/follow-button.component';
+import { SendMessageButtonComponent } from '../../messages/components/send-message-button.component';
+import { FollowsApiService } from '../../follows/services/follows-api.service';
+import { UsersApiService } from '../../users/services/users-api.service';
+import { PostsApiService } from '../../posts/services/posts-api.service';
+import { UserDto } from '../../users/models/users.models';
+import { PostDto } from '../../posts/models/posts.models';
+
 
 @Component({
   selector: 'app-profile-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, ReactiveFormsModule, StateCardComponent, UserAvatarComponent, PostCardComponent, PostMediaCarouselComponent],
+  imports: [DatePipe, ReactiveFormsModule, StateCardComponent, UserAvatarComponent, PostCardComponent, PostMediaCarouselComponent, FollowButtonComponent, SendMessageButtonComponent],
   host: {
     '(document:click)': 'closeAllMenus()',
   },
@@ -38,6 +45,8 @@ export class ProfilePage {
   private readonly postStore = inject(PostStoreService);
   private readonly feedback = inject(FeedbackService);
   private readonly confirm = inject(ConfirmService);
+  private readonly followsApi = inject(FollowsApiService);
+  private readonly router = inject(Router);
 
   readonly profile = signal<UserDto | null>(null);
   readonly profileError = signal<string | null>(null);
@@ -56,6 +65,8 @@ export class ProfilePage {
   readonly openComments = signal<Record<string, boolean>>({});
   readonly feedVideoSoundEnabled = signal(false);
   readonly activePostMenu = signal<string | null>(null);
+  readonly followersCount = signal(0);
+  readonly followingCount = signal(0);
   readonly profileForm = this.formBuilder.group({
     fullName: ['', [Validators.required]],
     email: ['', [Validators.required, Validators.email]],
@@ -270,6 +281,18 @@ export class ProfilePage {
       this.profileError.set(null);
       this.profile.set(await firstValueFrom(this.usersApi.getUserById(userId)));
 
+      // Load followers/following counts
+      try {
+        const [followersCount, followingCount] = await Promise.all([
+          firstValueFrom(this.followsApi.getFollowersCount(userId)),
+          firstValueFrom(this.followsApi.getFollowingCount(userId)),
+        ]);
+        this.followersCount.set(followersCount);
+        this.followingCount.set(followingCount);
+      } catch {
+        // Silently fail - counts will remain at 0
+      }
+
       if (!this.postStore.posts().length) {
         await this.postStore.loadPosts();
       }
@@ -308,11 +331,11 @@ export class ProfilePage {
       return;
     }
 
-      this.profileForm.reset({
-        fullName: user.fullName ?? '',
-        email: user.email ?? '',
-        biography: user.biography ?? '',
-      });
+    this.profileForm.reset({
+      fullName: user.fullName ?? '',
+      email: user.email ?? '',
+      biography: user.biography ?? '',
+    });
   }
 
   private setPendingAvatar(file: File): void {
@@ -376,22 +399,22 @@ export class ProfilePage {
   protected isPostAudioUrl(url: string): boolean {
     const lowerUrl = url.toLowerCase();
     return lowerUrl.includes('audi-') ||
-           /\.(mp3|wav|ogg|aac|m4a)/i.test(url) || 
-           lowerUrl.includes('type=audio') || 
-           lowerUrl.includes('.mp3') || 
-           lowerUrl.includes('.wav') || 
-           lowerUrl.includes('grabacion') || 
-           lowerUrl.includes('audio') || 
-           lowerUrl.includes('voice');
+      /\.(mp3|wav|ogg|aac|m4a)/i.test(url) ||
+      lowerUrl.includes('type=audio') ||
+      lowerUrl.includes('.mp3') ||
+      lowerUrl.includes('.wav') ||
+      lowerUrl.includes('grabacion') ||
+      lowerUrl.includes('audio') ||
+      lowerUrl.includes('voice');
   }
 
   protected isPostVideoUrl(url: string): boolean {
     const lowerUrl = url.toLowerCase();
     return lowerUrl.includes('vid-') ||
-           ((/\.(mp4|webm|ogv|mov|avi)/i.test(url) || 
-           lowerUrl.includes('type=video') || 
-           lowerUrl.includes('.mp4') || 
-           lowerUrl.includes('.webm')) && !this.isPostAudioUrl(url));
+      ((/\.(mp4|webm|ogv|mov|avi)/i.test(url) ||
+        lowerUrl.includes('type=video') ||
+        lowerUrl.includes('.mp4') ||
+        lowerUrl.includes('.webm')) && !this.isPostAudioUrl(url));
   }
 
   protected getMediaType(url: string): 'image' | 'video' | 'audio' | 'unknown' {
@@ -499,7 +522,7 @@ export class ProfilePage {
       userId: post.userId ?? '',
       fullName: post.userFullName ?? 'Usuario',
       email: '',
-      isVerified: !!post['userIsVerified'],
+      isVerified: false, // This field is not available in PostDto
       profilePhotoUrl: post.userAvatar ?? null,
     };
   }
@@ -606,6 +629,13 @@ export class ProfilePage {
   protected onQuoteCardClick(origPost: PostDto): void {
     this.postInDetail.set(origPost);
     this.isDetailModalOpen.set(true);
+  }
+
+  protected navigateToFollows(tab: 'followers' | 'following'): void {
+    const userId = this.resolvedUserId();
+    if (userId) {
+      void this.router.navigate(['/follows', userId], { queryParams: { tab } });
+    }
   }
 }
 

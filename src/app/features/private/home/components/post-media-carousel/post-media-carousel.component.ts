@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 
 import { MediaUrlPipe } from '../../../../../core/ui/media-url.pipe';
-import { AudioPlayerComponent } from '../../../../posts/audio-player.component';
+import { AudioPlayerComponent } from '../../../../posts/components/audio-player.component';
 
 type MediaType = 'image' | 'audio' | 'video';
 

@@ -11,7 +11,7 @@ export class ApiClientService {
   private readonly http = inject(HttpClient);
   private readonly apiBaseUrl = environment.apiBaseUrl;
 
-  get<T, TQuery extends object = never>(path: string, query?: TQuery): Observable<T> {
+  get<T, TQuery extends object | undefined = undefined>(path: string, query?: TQuery): Observable<T> {
     return this.http
       .get<T | GenericResponse<T>>(this.toUrl(path), { params: buildHttpParams(query) })
       .pipe(map((response) => unwrapApiResponse(response)));

@@ -5,7 +5,8 @@ import { firstValueFrom } from 'rxjs';
 
 import { getErrorMessage } from '../../../core/api/api.utils';
 import { FeedbackService } from '../../../core/ui/feedback.service';
-import { UsersApiService } from '../../users/users-api.service';
+import { UsersApiService } from '../../users/services/users-api.service';
+
 
 @Component({
   selector: 'app-register-page',

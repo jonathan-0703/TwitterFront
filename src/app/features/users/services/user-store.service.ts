@@ -1,12 +1,12 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
-import { getErrorMessage } from '../../core/api/api.utils';
-import { SessionService } from '../../core/auth/session.service';
-import { FeedbackService } from '../../core/ui/feedback.service';
+import { getErrorMessage } from '../../../core/api/api.utils';
+import { SessionService } from '../../../core/auth/session.service';
+import { FeedbackService } from '../../../core/ui/feedback.service';
 import { UserAvatarRevisionService } from './user-avatar-revision.service';
 import { UsersApiService } from './users-api.service';
-import { UpdateUserRequest, UserDto } from './users.models';
+import { UpdateUserRequest, UserDto } from '../models/users.models';
 
 @Injectable({ providedIn: 'root' })
 export class UserStoreService {

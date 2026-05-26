@@ -1,6 +1,7 @@
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../../environments/environment';
+import { UserDto } from '../models/users.models';
 
-import { UserDto } from './users.models';
+
 
 /**
  * Returns the absolute URL to use as `<img src>` for a user's avatar.

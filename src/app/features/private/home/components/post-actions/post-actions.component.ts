@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { PostDto } from '../../../../posts/models/posts.models';
 
-import { PostDto } from '../../../../posts/posts.models';
+
 
 @Component({
   selector: 'app-post-actions',

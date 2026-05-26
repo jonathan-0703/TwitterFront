@@ -1,0 +1,66 @@
+<div class="follows-container">
+  <div class="follows-header">
+    <h1>{{ isOwnProfile() ? 'Mis conexiones' : 'Conexiones' }}</h1>
+  </div>
+
+  <div class="tabs">
+    <button
+      type="button"
+      class="tab"
+      [class.active]="activeTab() === 'followers'"
+      (click)="switchTab('followers')"
+    >
+      Seguidores
+      <span class="tab-count">{{ followersCount() }}</span>
+    </button>
+    <button
+      type="button"
+      class="tab"
+      [class.active]="activeTab() === 'following'"
+      (click)="switchTab('following')"
+    >
+      Siguiendo
+      <span class="tab-count">{{ followingCount() }}</span>
+    </button>
+  </div>
+
+  <div class="follows-content">
+    @if (loading()) {
+      <app-state-card tone="loading" title="Cargando" message="Obteniendo la lista..." />
+    } @else if (error()) {
+      <app-state-card tone="error" title="Error" [message]="error()!" />
+    } @else if (currentList().length === 0) {
+      <app-state-card
+        tone="empty"
+        [title]="activeTab() === 'followers' ? 'Sin seguidores' : 'Sin seguidos'"
+        [message]="
+          activeTab() === 'followers'
+            ? 'Este usuario aún no tiene seguidores'
+            : 'Este usuario aún no sigue a nadie'
+        "
+      />
+    } @else {
+      <div class="user-list">
+        @for (user of currentList(); track trackUser($index, user)) {
+          <div class="user-card">
+            <div class="user-info" (click)="navigateToProfile(user.userId)">
+              <app-user-avatar [user]="toUserDto(user)" class="user-avatar" />
+              <div class="user-details">
+                <strong class="user-name">{{ user.fullName }}</strong>
+                <p class="user-handle">{{ user.email }}</p>
+                @if (user.biography) {
+                  <p class="user-bio">{{ user.biography }}</p>
+                }
+                <div class="user-stats">
+                  <span>{{ user.followersCount }} seguidores</span>
+                  <span>{{ user.followingCount }} siguiendo</span>
+                </div>
+              </div>
+            </div>
+            <app-follow-button [userId]="user.userId" />
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

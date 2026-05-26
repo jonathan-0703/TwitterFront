@@ -152,6 +152,17 @@ textarea {
   border: 2px solid var(--border-color);
   background: var(--bg-card);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 0 0 1px var(--border-color);
+
+  &.clickable {
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      border-color: var(--accent-color, #1d9bf0);
+      box-shadow: 0 4px 12px rgba(29, 155, 240, 0.15);
+      transform: translateY(-2px);
+    }
+  }
 }
 
 .metric-card strong,

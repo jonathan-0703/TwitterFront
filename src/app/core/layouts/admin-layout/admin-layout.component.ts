@@ -5,7 +5,7 @@ import { SessionService } from '../../auth/session.service';
 import { AccentPickerComponent } from '../../ui/accent-picker.component';
 import { FeedbackService } from '../../ui/feedback.service';
 import { ThemeToggleComponent } from '../../ui/theme-toggle.component';
-import { UserStoreService } from '../../../features/users/user-store.service';
+import { UserStoreService } from '../../../features/users/services/user-store.service';
 
 @Component({
   selector: 'app-admin-layout',

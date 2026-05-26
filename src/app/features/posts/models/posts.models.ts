@@ -1,4 +1,5 @@
-import { JsonRecord, PaginationQuery } from '../../core/api/api.models';
+import { JsonRecord, PaginationQuery } from "../../../core/api/api.models";
+
 
 export interface PostDto extends JsonRecord {
   postId?: string;

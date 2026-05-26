@@ -8,17 +8,20 @@ import { getErrorMessage } from '../../../core/api/api.utils';
 import { SessionService } from '../../../core/auth/session.service';
 import { ConfirmService } from '../../../core/ui/confirm.service';
 import { StateCardComponent } from '../../../shared/components/state-card/state-card.component';
-import { AudioPlayerComponent } from '../../posts/audio-player.component';
-import { AudioRecorderModalComponent } from '../../posts/audio-recorder-modal.component';
-import { PostsApiService } from '../../posts/posts-api.service';
-import { PostStoreService } from '../../posts/post-store.service';
-import { PostDto } from '../../posts/posts.models';
-import { UserAvatarComponent } from '../../users/user-avatar.component';
-import { UserDto } from '../../users/users.models';
+import { AudioPlayerComponent } from '../../posts/components/audio-player.component';
+import { AudioRecorderModalComponent } from '../../posts/components/audio-recorder-modal.component';
+
+import { PostStoreService } from '../../posts/services/post-store.service';
+
+import { UserAvatarComponent } from '../../users/components/user-avatar.component';
+
 import { HomeComposerComponent } from './components/home-composer/home-composer.component';
 import { PostActionsComponent } from './components/post-actions/post-actions.component';
 import { PostMediaCarouselComponent } from './components/post-media-carousel/post-media-carousel.component';
-import { PostCardComponent } from '../../posts/post-card.component';
+import { PostCardComponent } from '../../posts/components/post-card.component';
+import { PostsApiService } from '../../posts/services/posts-api.service';
+import { PostDto } from '../../posts/models/posts.models';
+import { UserDto } from '../../users/models/users.models';
 
 export interface MediaAttachment {
   file?: File;
@@ -53,6 +56,7 @@ export class HomePage {
   readonly saving = this.postStore.saving;
   readonly error = this.postStore.error;
   readonly selectedPost = signal<PostDto | null>(null);
+
   readonly selectedPostError = signal<string | null>(null);
   readonly editingPostId = signal<string | null>(null);
   readonly likedPosts = this.postStore.likedPosts;
@@ -64,7 +68,7 @@ export class HomePage {
 
   readonly isQuoteModalOpen = signal(false);
   readonly postToQuote = signal<PostDto | null>(null);
-  
+
   readonly isComposeModalOpen = signal(false);
   readonly isDetailModalOpen = signal(false);
   readonly postInDetail = signal<PostDto | null>(null);
@@ -403,7 +407,7 @@ export class HomePage {
     const postId = post.postId;
     if (!postId) return;
     this.activeRetweetMenu.set(null);
-    
+
     if (this.isRetweeted(postId)) {
       await this.postStore.unretweet(postId);
     } else {
@@ -678,23 +682,23 @@ export class HomePage {
     // Es audio si tiene prefijo "audi-", extensiones típicas de audio,
     // o si es un webm pero contiene "grabacion", "audio" o "voice" en su nombre/URL.
     return lowerUrl.includes('audi-') ||
-           /\.(mp3|wav|ogg|aac|m4a)/i.test(url) || 
-           lowerUrl.includes('type=audio') || 
-           lowerUrl.includes('.mp3') || 
-           lowerUrl.includes('.wav') || 
-           lowerUrl.includes('grabacion') || 
-           lowerUrl.includes('audio') || 
-           lowerUrl.includes('voice');
+      /\.(mp3|wav|ogg|aac|m4a)/i.test(url) ||
+      lowerUrl.includes('type=audio') ||
+      lowerUrl.includes('.mp3') ||
+      lowerUrl.includes('.wav') ||
+      lowerUrl.includes('grabacion') ||
+      lowerUrl.includes('audio') ||
+      lowerUrl.includes('voice');
   }
 
   protected isPostVideoUrl(url: string): boolean {
     const lowerUrl = url.toLowerCase();
     // Es video si tiene prefijo "vid-", extensiones típicas, o contiene "video"
     return lowerUrl.includes('vid-') ||
-           ((/\.(mp4|webm|ogv|mov|avi)/i.test(url) || 
-           lowerUrl.includes('type=video') || 
-           lowerUrl.includes('.mp4') || 
-           lowerUrl.includes('.webm')) && !this.isPostAudioUrl(url));
+      ((/\.(mp4|webm|ogv|mov|avi)/i.test(url) ||
+        lowerUrl.includes('type=video') ||
+        lowerUrl.includes('.mp4') ||
+        lowerUrl.includes('.webm')) && !this.isPostAudioUrl(url));
   }
 
   private resetForm(): void {

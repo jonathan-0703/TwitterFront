@@ -4,6 +4,7 @@ import { provideRouter, withComponentInputBinding } from '@angular/router';
 
 import { authInterceptor } from './core/auth/auth.interceptor';
 import { SessionService } from './core/auth/session.service';
+import { initializeSignalR } from './core/realtime/signalr.initializer';
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
@@ -15,6 +16,11 @@ export const appConfig: ApplicationConfig = {
       provide: ENVIRONMENT_INITIALIZER,
       multi: true,
       useValue: () => inject(SessionService).hydrate(),
+    },
+    {
+      provide: ENVIRONMENT_INITIALIZER,
+      multi: true,
+      useFactory: initializeSignalR,
     },
   ],
 };

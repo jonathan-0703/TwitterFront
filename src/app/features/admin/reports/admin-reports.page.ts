@@ -7,8 +7,9 @@ import { getErrorMessage } from '../../../core/api/api.utils';
 import { ConfirmService } from '../../../core/ui/confirm.service';
 import { FeedbackService } from '../../../core/ui/feedback.service';
 import { StateCardComponent } from '../../../shared/components/state-card/state-card.component';
-import { AdminApiService } from '../admin-api.service';
-import { AdminReportDto } from '../admin.models';
+
+import { AdminReportDto } from '../models/admin.models';
+import { AdminApiService } from '../services/admin-api.service';
 
 type ReportHistoryFilter = 'all' | 'pending' | 'resolved' | 'dismissed';
 

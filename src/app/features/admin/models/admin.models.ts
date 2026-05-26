@@ -1,6 +1,7 @@
-import { JsonRecord, PaginationQuery } from '../../core/api/api.models';
-import { PostDto } from '../posts/posts.models';
-import { UserDto } from '../users/users.models';
+import { JsonRecord, PaginationQuery } from '../../../core/api/api.models';
+import { PostDto } from '../../posts/models/posts.models';
+import { UserDto } from '../../users/models/users.models';
+
 
 export interface AdminDashboardStats extends JsonRecord {
   usersCount?: number;

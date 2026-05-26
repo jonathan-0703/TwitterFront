@@ -8,15 +8,18 @@ import { SessionService } from '../../../core/auth/session.service';
 import { ConfirmService } from '../../../core/ui/confirm.service';
 import { FeedbackService } from '../../../core/ui/feedback.service';
 import { StateCardComponent } from '../../../shared/components/state-card/state-card.component';
-import { UserAvatarComponent } from '../../users/user-avatar.component';
-import { UsersApiService } from '../../users/users-api.service';
-import { UserStoreService } from '../../users/user-store.service';
-import { UserDto } from '../../users/users.models';
+import { UserAvatarComponent } from '../../users/components/user-avatar.component';
+import { SendMessageButtonComponent } from '../../messages/components/send-message-button.component';
+
+import { UserStoreService } from '../../users/services/user-store.service';
+import { UsersApiService } from '../../users/services/users-api.service';
+import { UserDto } from '../../users/models/users.models';
+
 
 @Component({
   selector: 'app-people-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, RouterLink, StateCardComponent, UserAvatarComponent],
+  imports: [DatePipe, RouterLink, StateCardComponent, UserAvatarComponent, SendMessageButtonComponent],
   templateUrl: './people.page.html',
   styleUrl: './people.page.scss',
 })
@@ -28,6 +31,7 @@ export class PeoplePage {
   private readonly confirm = inject(ConfirmService);
 
   readonly selectedUser = signal<UserDto | null>(null);
+
   readonly deletingUserId = signal<string | null>(null);
   readonly actionError = signal<string | null>(null);
   readonly searchQuery = signal('');
@@ -36,12 +40,12 @@ export class PeoplePage {
   readonly storeError = this.userStore.error;
   readonly currentUserId = computed(() => this.sessionService.userId());
   readonly canDeleteUsers = computed(() => this.sessionService.hasRole(['Admin', 'SuperAdmin', 'Moderator', 'Developer']));
-  
+
   // Centralized computed signal for filtering users based on the logged-in user's roles
   readonly filteredUsers = computed(() => {
     const allUsers = this.users();
     const isCurrentPrivileged = this.sessionService.hasRole(['Admin', 'SuperAdmin', 'Moderator', 'Developer']);
-    
+
     if (isCurrentPrivileged) {
       return allUsers;
     }
@@ -55,7 +59,7 @@ export class PeoplePage {
   readonly activeCount = computed(() => this.filteredUsers().filter((user) => !user.deletedAt && user.isActive !== false).length);
   readonly verifiedCount = computed(() => this.filteredUsers().filter((user) => Boolean(user.isVerified)).length);
   readonly deletedCount = computed(() => this.filteredUsers().filter((user) => Boolean(user.deletedAt)).length);
-  
+
   readonly directory = computed(() => {
     const sorted = [...this.filteredUsers()].sort((left, right) => this.compareUsers(left, right));
     const query = this.searchQuery().trim().toLowerCase();
@@ -66,7 +70,7 @@ export class PeoplePage {
 
     return sorted.filter((user) => this.matchesQuery(user, query));
   });
-  
+
   readonly hasActiveSearch = computed(() => this.searchQuery().trim().length > 0);
   readonly hasNoMatches = computed(() => this.hasActiveSearch() && !this.directory().length && !!this.filteredUsers().length);
 

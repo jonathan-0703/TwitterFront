@@ -1,8 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 
-import { UserAvatarRevisionService } from './user-avatar-revision.service';
-import { deriveUserInitials, resolveAvatarUrl } from './users-avatar.utils';
-import { UserDto } from './users.models';
+import { UserAvatarRevisionService } from '../services/user-avatar-revision.service';
+import { deriveUserInitials, resolveAvatarUrl } from '../utils/users-avatar.utils';
+import { UserDto } from '../models/users.models';
+
 
 /**
  * Renders a circular avatar image for a user. Resolution priority:

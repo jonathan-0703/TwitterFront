@@ -14,30 +14,36 @@
           <p>{{ displayHandle() }} · {{ user.email || 'Sin correo' }}</p>
           <p class="identity-biography">{{ biographyPreview() }}</p>
         </div>
-
       </div>
 
       <div class="summary-grid">
+        <article class="metric-card clickable" (click)="navigateToFollows('followers')">
+          <strong>{{ followersCount() }}</strong>
+          <p>Seguidores</p>
+        </article>
+        <article class="metric-card clickable" (click)="navigateToFollows('following')">
+          <strong>{{ followingCount() }}</strong>
+          <p>Siguiendo</p>
+        </article>
         <article class="metric-card">
           <strong>{{ posts().length }}</strong>
           <p>Publicaciones</p>
         </article>
-        <article class="metric-card">
-          <strong>{{ publishedPostsCount() }}</strong>
-          <p>Publicadas</p>
-        </article>
-        <article class="metric-card">
-          <strong>{{ draftPostsCount() }}</strong>
-          <p>Borradores</p>
-        </article>
       </div>
 
-      @if (isOwnProfile()) {
-        <div class="profile-actions-row">
-          <button type="button" class="primary-action" (click)="openEditProfile()">Editar perfil</button>
-          <button type="button" class="secondary-action" (click)="openChangePassword()">Cambiar contraseña</button>
-        </div>
-      }
+      <div class="profile-actions-row">
+        @if (isOwnProfile()) {
+          <button type="button" class="primary-action" (click)="openEditProfile()">
+            Editar perfil
+          </button>
+          <button type="button" class="secondary-action" (click)="openChangePassword()">
+            Cambiar contraseña
+          </button>
+        } @else {
+          <app-follow-button [userId]="resolvedUserId()" />
+          <app-send-message-button [userId]="resolvedUserId()" />
+        }
+      </div>
     } @else if (loading()) {
       <p>Cargando información del perfil…</p>
     }
@@ -71,7 +77,11 @@
           </article>
         </div>
       } @else if (loading()) {
-        <app-state-card tone="loading" title="Cargando perfil" message="Un momento mientras traemos los datos." />
+        <app-state-card
+          tone="loading"
+          title="Cargando perfil"
+          message="Un momento mientras traemos los datos."
+        />
       } @else {
         <app-state-card
           tone="empty"
@@ -136,13 +146,26 @@
 
   @if (editProfileOpen()) {
     <div class="modal-backdrop" (click)="closeEditProfile()">
-      <section class="modal-container surface-card profile-modal" (click)="$event.stopPropagation()" aria-labelledby="edit-profile-title" aria-modal="true" role="dialog">
+      <section
+        class="modal-container surface-card profile-modal"
+        (click)="$event.stopPropagation()"
+        aria-labelledby="edit-profile-title"
+        aria-modal="true"
+        role="dialog"
+      >
         <header class="modal-header">
           <div>
             <p class="eyebrow">Mi perfil</p>
             <h3 id="edit-profile-title">Editar datos de la cuenta</h3>
           </div>
-          <button type="button" class="close-modal-btn" (click)="closeEditProfile()" aria-label="Cerrar el modal de editar perfil">&times;</button>
+          <button
+            type="button"
+            class="close-modal-btn"
+            (click)="closeEditProfile()"
+            aria-label="Cerrar el modal de editar perfil"
+          >
+            &times;
+          </button>
         </header>
 
         @if (profileSaveMessage(); as message) {
@@ -156,23 +179,43 @@
         <form class="stack" [formGroup]="profileForm" (ngSubmit)="saveProfile()">
           <div class="avatar-editor">
             <div class="avatar-editor-frame">
-              <app-user-avatar class="avatar-editor-photo" [user]="profile()" [previewUrl]="pendingAvatarPreviewUrl()" />
+              <app-user-avatar
+                class="avatar-editor-photo"
+                [user]="profile()"
+                [previewUrl]="pendingAvatarPreviewUrl()"
+              />
 
-              <label class="avatar-editor-edit" [class.disabled]="profileFormLoading()" title="Cambiar foto de perfil">
+              <label
+                class="avatar-editor-edit"
+                [class.disabled]="profileFormLoading()"
+                title="Cambiar foto de perfil"
+              >
                 <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                  <path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                  <path
+                    fill="currentColor"
+                    d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
+                  />
                 </svg>
                 <span class="visually-hidden">Cambiar foto de perfil</span>
-                <input type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" [disabled]="profileFormLoading()" (change)="stageAvatar($event)" />
+                <input
+                  type="file"
+                  accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                  [disabled]="profileFormLoading()"
+                  (change)="stageAvatar($event)"
+                />
               </label>
             </div>
 
-            <p class="avatar-editor-hint">JPG, JPEG, PNG o WEBP. La nueva foto se sube solo cuando guardas.</p>
+            <p class="avatar-editor-hint">
+              JPG, JPEG, PNG o WEBP. La nueva foto se sube solo cuando guardas.
+            </p>
 
             @if (pendingAvatarFile(); as pendingAvatar) {
               <div class="avatar-editor-meta">
                 <span>{{ pendingAvatar.name }}</span>
-                <button type="button" class="inline-link" (click)="removePendingAvatar()">Quitar selección</button>
+                <button type="button" class="inline-link" (click)="removePendingAvatar()">
+                  Quitar selección
+                </button>
               </div>
             }
           </div>
@@ -188,14 +231,26 @@
 
           <label class="field">
             <span>Biografía</span>
-            <textarea rows="4" formControlName="biography" autocomplete="off" placeholder="Cuéntale a la gente un poco sobre ti"></textarea>
+            <textarea
+              rows="4"
+              formControlName="biography"
+              autocomplete="off"
+              placeholder="Cuéntale a la gente un poco sobre ti"
+            ></textarea>
           </label>
 
           <div class="button-row">
             <button type="submit" class="primary-action" [disabled]="!canSaveProfile()">
               {{ profileFormLoading() ? 'Guardando...' : 'Guardar cambios' }}
             </button>
-            <button type="button" class="secondary-action" [disabled]="profileFormLoading()" (click)="closeEditProfile()">Cancelar</button>
+            <button
+              type="button"
+              class="secondary-action"
+              [disabled]="profileFormLoading()"
+              (click)="closeEditProfile()"
+            >
+              Cancelar
+            </button>
           </div>
         </form>
       </section>
@@ -204,13 +259,26 @@
 
   @if (changePasswordOpen()) {
     <div class="modal-backdrop" (click)="closeChangePassword()">
-      <section class="modal-container surface-card profile-modal" (click)="$event.stopPropagation()" aria-labelledby="change-password-title" aria-modal="true" role="dialog">
+      <section
+        class="modal-container surface-card profile-modal"
+        (click)="$event.stopPropagation()"
+        aria-labelledby="change-password-title"
+        aria-modal="true"
+        role="dialog"
+      >
         <header class="modal-header">
           <div>
             <p class="eyebrow">Seguridad</p>
             <h3 id="change-password-title">Cambiar contraseña</h3>
           </div>
-          <button type="button" class="close-modal-btn" (click)="closeChangePassword()" aria-label="Cerrar el modal de cambio de contraseña">&times;</button>
+          <button
+            type="button"
+            class="close-modal-btn"
+            (click)="closeChangePassword()"
+            aria-label="Cerrar el modal de cambio de contraseña"
+          >
+            &times;
+          </button>
         </header>
 
         @if (passwordErrorMessage(); as message) {
@@ -224,7 +292,11 @@
         <form class="stack" [formGroup]="passwordForm" (ngSubmit)="savePassword()">
           <label class="field">
             <span>Contraseña actual</span>
-            <input type="password" formControlName="currentPassword" autocomplete="current-password" />
+            <input
+              type="password"
+              formControlName="currentPassword"
+              autocomplete="current-password"
+            />
           </label>
 
           <label class="field">
@@ -238,7 +310,10 @@
           </label>
 
           <div class="checklist compact-checklist">
-            <article class="check-item" [class.ready]="passwordForm.controls.currentPassword.value.length > 0">
+            <article
+              class="check-item"
+              [class.ready]="passwordForm.controls.currentPassword.value.length > 0"
+            >
               <strong>Contraseña actual ingresada</strong>
               <p>El endpoint requiere la contraseña actual antes de aceptar el cambio.</p>
             </article>
@@ -246,21 +321,35 @@
               <strong>Longitud mínima cumplida</strong>
               <p>La nueva contraseña debe tener al menos seis caracteres.</p>
             </article>
-            <article class="check-item" [class.ready]="!passwordMismatch() && passwordForm.controls.confirmPassword.value.length > 0">
+            <article
+              class="check-item"
+              [class.ready]="
+                !passwordMismatch() && passwordForm.controls.confirmPassword.value.length > 0
+              "
+            >
               <strong>La confirmación coincide</strong>
               <p>El campo de confirmación debe coincidir exactamente con la nueva contraseña.</p>
             </article>
           </div>
 
           @if (passwordMismatch()) {
-            <p class="feedback error">La nueva contraseña y la confirmación deben coincidir antes de guardar.</p>
+            <p class="feedback error">
+              La nueva contraseña y la confirmación deben coincidir antes de guardar.
+            </p>
           }
 
           <div class="button-row">
             <button type="submit" class="primary-action" [disabled]="passwordSaving()">
               {{ passwordSaving() ? 'Guardando...' : 'Actualizar contraseña' }}
             </button>
-            <button type="button" class="secondary-action" [disabled]="passwordSaving()" (click)="closeChangePassword()">Cancelar</button>
+            <button
+              type="button"
+              class="secondary-action"
+              [disabled]="passwordSaving()"
+              (click)="closeChangePassword()"
+            >
+              Cancelar
+            </button>
           </div>
         </form>
       </section>
@@ -270,14 +359,25 @@
   <!-- Premium Glassmorphic Tweet Detail Modal (Lightbox) -->
   @if (isDetailModalOpen() && postInDetail(); as detailPost) {
     <div class="modal-backdrop detail-lightbox-backdrop" (click)="closeDetailModal()">
-      <div class="modal-container surface-card detail-modal-container" [class.has-media]="detailPost.mediaUrls && detailPost.mediaUrls.length > 0" (click)="$event.stopPropagation()">
+      <div
+        class="modal-container surface-card detail-modal-container"
+        [class.has-media]="detailPost.mediaUrls && detailPost.mediaUrls.length > 0"
+        (click)="$event.stopPropagation()"
+      >
         @if (detailPost.mediaUrls && detailPost.mediaUrls.length > 0) {
           <div class="detail-split-layout">
             <!-- Left Side: Media Column -->
             <div class="detail-media-column">
               <!-- Floating Close Button for Mobile/Responsive or overlay convenience -->
-              <button type="button" class="close-modal-floating" (click)="closeDetailModal()" aria-label="Cerrar modal">&times;</button>
-              
+              <button
+                type="button"
+                class="close-modal-floating"
+                (click)="closeDetailModal()"
+                aria-label="Cerrar modal"
+              >
+                &times;
+              </button>
+
               <app-post-media-carousel
                 [mediaUrls]="detailPost.mediaUrls"
                 [postId]="detailPost.postId"
@@ -298,7 +398,14 @@
                   <strong>{{ authorName(detailPost) }}</strong>
                   <p>{{ authorHandle(detailPost) }}</p>
                 </div>
-                <button type="button" class="close-modal-btn-inline" (click)="closeDetailModal()" aria-label="Cerrar modal">&times;</button>
+                <button
+                  type="button"
+                  class="close-modal-btn-inline"
+                  (click)="closeDetailModal()"
+                  aria-label="Cerrar modal"
+                >
+                  &times;
+                </button>
               </header>
 
               <div class="detail-info-body">
@@ -312,47 +419,96 @@
 
                 <!-- Interaction counters bar -->
                 <div class="detail-stats-bar">
-                  <span class="stat-item"><strong>{{ getRepliesCount(detailPost) }}</strong> Respuestas</span>
-                  <span class="stat-item"><strong>{{ getRetweetsCount(detailPost) }}</strong> Compartidas</span>
-                  <span class="stat-item"><strong>{{ getLikesCount(detailPost) }}</strong> Me gusta</span>
+                  <span class="stat-item"
+                    ><strong>{{ getRepliesCount(detailPost) }}</strong> Respuestas</span
+                  >
+                  <span class="stat-item"
+                    ><strong>{{ getRetweetsCount(detailPost) }}</strong> Compartidas</span
+                  >
+                  <span class="stat-item"
+                    ><strong>{{ getLikesCount(detailPost) }}</strong> Me gusta</span
+                  >
                 </div>
 
                 <!-- Large Action Row -->
                 <div class="post-social-actions detail-actions">
-                  <button type="button" 
-                          class="social-btn comment-btn" 
-                          title="Responder"
-                          (click)="detailCommentInputSplit.focus()">
-                    <svg class="social-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                  <button
+                    type="button"
+                    class="social-btn comment-btn"
+                    title="Responder"
+                    (click)="detailCommentInputSplit.focus()"
+                  >
+                    <svg
+                      class="social-icon"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path
+                        d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+                      />
                     </svg>
                   </button>
 
                   <div class="retweet-btn-wrapper" (click)="$event.stopPropagation()">
-                    <button type="button" 
-                            class="social-btn retweet-btn" 
-                            [class.active]="isRetweeted(detailPost.postId)"
-                            (click)="toggleRetweetMenu(detailPost.postId, $event)"
-                            title="Compartir">
-                      <svg class="social-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="17 1 21 5 17 9"/>
-                        <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
-                        <polyline points="7 23 3 19 7 15"/>
-                        <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+                    <button
+                      type="button"
+                      class="social-btn retweet-btn"
+                      [class.active]="isRetweeted(detailPost.postId)"
+                      (click)="toggleRetweetMenu(detailPost.postId, $event)"
+                      title="Compartir"
+                    >
+                      <svg
+                        class="social-icon"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <polyline points="17 1 21 5 17 9" />
+                        <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+                        <polyline points="7 23 3 19 7 15" />
+                        <path d="M21 13v2a4 4 0 0 1-4 4H3" />
                       </svg>
                     </button>
 
                     @if (activeRetweetMenu() === detailPost.postId) {
                       <div class="retweet-dropdown-menu" (click)="$event.stopPropagation()">
-                        <button type="button" class="dropdown-item" (click)="directRetweet(detailPost)">
-                          <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+                        <button
+                          type="button"
+                          class="dropdown-item"
+                          (click)="directRetweet(detailPost)"
+                        >
+                          <svg
+                            class="dropdown-icon"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                          >
+                            <polyline points="17 1 21 5 17 9" />
+                            <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+                            <polyline points="7 23 3 19 7 15" />
+                            <path d="M21 13v2a4 4 0 0 1-4 4H3" />
                           </svg>
                           <span>Compartir</span>
                         </button>
-                        <button type="button" class="dropdown-item" (click)="openQuoteModal(detailPost)">
-                          <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        <button
+                          type="button"
+                          class="dropdown-item"
+                          (click)="openQuoteModal(detailPost)"
+                        >
+                          <svg
+                            class="dropdown-icon"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                          >
+                            <path
+                              d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+                            />
                           </svg>
                           <span>Citar</span>
                         </button>
@@ -360,13 +516,23 @@
                     }
                   </div>
 
-                  <button type="button" 
-                          class="social-btn like-btn" 
-                          [class.active]="isLiked(detailPost.postId)"
-                          (click)="toggleLike(detailPost)"
-                          title="Me gusta">
-                    <svg class="social-icon" viewBox="0 0 24 24" [attr.fill]="isLiked(detailPost.postId) ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2">
-                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                  <button
+                    type="button"
+                    class="social-btn like-btn"
+                    [class.active]="isLiked(detailPost.postId)"
+                    (click)="toggleLike(detailPost)"
+                    title="Me gusta"
+                  >
+                    <svg
+                      class="social-icon"
+                      viewBox="0 0 24 24"
+                      [attr.fill]="isLiked(detailPost.postId) ? 'currentColor' : 'none'"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path
+                        d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -374,25 +540,41 @@
                 <!-- Comments thread inside detail lightbox -->
                 <div class="detail-comments-drawer" (click)="$event.stopPropagation()">
                   <div class="comment-composer">
-                    <input #detailCommentInputSplit 
-                           type="text" 
-                           placeholder="Escribe tu respuesta..." 
-                           (keyup.enter)="addComment(detailPost.postId, detailCommentInputSplit.value); detailCommentInputSplit.value = ''" />
-                    <button type="button" 
-                            class="reply-action-btn"
-                            (click)="addComment(detailPost.postId, detailCommentInputSplit.value); detailCommentInputSplit.value = ''">
+                    <input
+                      #detailCommentInputSplit
+                      type="text"
+                      placeholder="Escribe tu respuesta..."
+                      (keyup.enter)="
+                        addComment(detailPost.postId, detailCommentInputSplit.value);
+                        detailCommentInputSplit.value = ''
+                      "
+                    />
+                    <button
+                      type="button"
+                      class="reply-action-btn"
+                      (click)="
+                        addComment(detailPost.postId, detailCommentInputSplit.value);
+                        detailCommentInputSplit.value = ''
+                      "
+                    >
                       Responder
                     </button>
                   </div>
 
                   <div class="comments-list">
                     @for (reply of getPostReplies(detailPost.postId); track reply.postId) {
-                      <div class="comment-item" (click)="openDetailModal(reply); $event.stopPropagation()">
+                      <div
+                        class="comment-item"
+                        (click)="openDetailModal(reply); $event.stopPropagation()"
+                      >
                         <app-user-avatar class="comment-avatar" [user]="postAuthor(reply)" />
                         <div class="comment-content">
                           <div class="comment-meta">
                             <strong>{{ authorName(reply) }}</strong>
-                            <span>{{ authorHandle(reply) }} · {{ (reply.createdAt | date: 'shortTime') || 'Recién' }}</span>
+                            <span
+                              >{{ authorHandle(reply) }} ·
+                              {{ (reply.createdAt | date: 'shortTime') || 'Recién' }}</span
+                            >
                           </div>
                           <p class="comment-text">{{ reply.content }}</p>
                         </div>
@@ -409,7 +591,9 @@
           <!-- Fallback: Standard layout for media-less posts to look perfectly centered and clean -->
           <header class="modal-header">
             <h3>Detalle de la publicación</h3>
-            <button type="button" class="close-modal-btn" (click)="closeDetailModal()">&times;</button>
+            <button type="button" class="close-modal-btn" (click)="closeDetailModal()">
+              &times;
+            </button>
           </header>
 
           <div class="detail-post-wrapper scrollable-content">
@@ -432,47 +616,94 @@
 
               <!-- Interaction counters bar -->
               <div class="detail-stats-bar">
-                <span class="stat-item"><strong>{{ getRepliesCount(detailPost) }}</strong> Respuestas</span>
-                <span class="stat-item"><strong>{{ getRetweetsCount(detailPost) }}</strong> Compartidas</span>
-                <span class="stat-item"><strong>{{ getLikesCount(detailPost) }}</strong> Me gusta</span>
+                <span class="stat-item"
+                  ><strong>{{ getRepliesCount(detailPost) }}</strong> Respuestas</span
+                >
+                <span class="stat-item"
+                  ><strong>{{ getRetweetsCount(detailPost) }}</strong> Compartidas</span
+                >
+                <span class="stat-item"
+                  ><strong>{{ getLikesCount(detailPost) }}</strong> Me gusta</span
+                >
               </div>
 
               <!-- Large Action Row -->
               <div class="post-social-actions detail-actions">
-                <button type="button" 
-                        class="social-btn comment-btn" 
-                        title="Responder"
-                        (click)="detailCommentInput.focus()">
-                  <svg class="social-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                <button
+                  type="button"
+                  class="social-btn comment-btn"
+                  title="Responder"
+                  (click)="detailCommentInput.focus()"
+                >
+                  <svg
+                    class="social-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+                    />
                   </svg>
                 </button>
 
                 <div class="retweet-btn-wrapper" (click)="$event.stopPropagation()">
-                  <button type="button" 
-                          class="social-btn retweet-btn" 
-                          [class.active]="isRetweeted(detailPost.postId)"
-                          (click)="toggleRetweetMenu(detailPost.postId, $event)"
-                          title="Compartir">
-                    <svg class="social-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <polyline points="17 1 21 5 17 9"/>
-                      <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
-                      <polyline points="7 23 3 19 7 15"/>
-                      <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+                  <button
+                    type="button"
+                    class="social-btn retweet-btn"
+                    [class.active]="isRetweeted(detailPost.postId)"
+                    (click)="toggleRetweetMenu(detailPost.postId, $event)"
+                    title="Compartir"
+                  >
+                    <svg
+                      class="social-icon"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <polyline points="17 1 21 5 17 9" />
+                      <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+                      <polyline points="7 23 3 19 7 15" />
+                      <path d="M21 13v2a4 4 0 0 1-4 4H3" />
                     </svg>
                   </button>
 
                   @if (activeRetweetMenu() === detailPost.postId) {
                     <div class="retweet-dropdown-menu" (click)="$event.stopPropagation()">
-                      <button type="button" class="dropdown-item" (click)="directRetweet(detailPost)">
-                        <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+                      <button
+                        type="button"
+                        class="dropdown-item"
+                        (click)="directRetweet(detailPost)"
+                      >
+                        <svg
+                          class="dropdown-icon"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                        >
+                          <polyline points="17 1 21 5 17 9" />
+                          <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+                          <polyline points="7 23 3 19 7 15" />
+                          <path d="M21 13v2a4 4 0 0 1-4 4H3" />
                         </svg>
                         <span>Compartir</span>
                       </button>
-                      <button type="button" class="dropdown-item" (click)="openQuoteModal(detailPost)">
-                        <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                      <button
+                        type="button"
+                        class="dropdown-item"
+                        (click)="openQuoteModal(detailPost)"
+                      >
+                        <svg
+                          class="dropdown-icon"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                        >
+                          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                         </svg>
                         <span>Citar</span>
                       </button>
@@ -480,13 +711,23 @@
                   }
                 </div>
 
-                <button type="button" 
-                        class="social-btn like-btn" 
-                        [class.active]="isLiked(detailPost.postId)"
-                        (click)="toggleLike(detailPost)"
-                        title="Me gusta">
-                  <svg class="social-icon" viewBox="0 0 24 24" [attr.fill]="isLiked(detailPost.postId) ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2">
-                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                <button
+                  type="button"
+                  class="social-btn like-btn"
+                  [class.active]="isLiked(detailPost.postId)"
+                  (click)="toggleLike(detailPost)"
+                  title="Me gusta"
+                >
+                  <svg
+                    class="social-icon"
+                    viewBox="0 0 24 24"
+                    [attr.fill]="isLiked(detailPost.postId) ? 'currentColor' : 'none'"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+                    />
                   </svg>
                 </button>
               </div>
@@ -494,25 +735,41 @@
               <!-- Comments thread inside detail lightbox -->
               <div class="detail-comments-drawer" (click)="$event.stopPropagation()">
                 <div class="comment-composer">
-                  <input #detailCommentInput 
-                         type="text" 
-                         placeholder="Escribe tu respuesta..." 
-                         (keyup.enter)="addComment(detailPost.postId, detailCommentInput.value); detailCommentInput.value = ''" />
-                  <button type="button" 
-                          class="reply-action-btn"
-                          (click)="addComment(detailPost.postId, detailCommentInput.value); detailCommentInput.value = ''">
+                  <input
+                    #detailCommentInput
+                    type="text"
+                    placeholder="Escribe tu respuesta..."
+                    (keyup.enter)="
+                      addComment(detailPost.postId, detailCommentInput.value);
+                      detailCommentInput.value = ''
+                    "
+                  />
+                  <button
+                    type="button"
+                    class="reply-action-btn"
+                    (click)="
+                      addComment(detailPost.postId, detailCommentInput.value);
+                      detailCommentInput.value = ''
+                    "
+                  >
                     Responder
                   </button>
                 </div>
 
                 <div class="comments-list">
                   @for (reply of getPostReplies(detailPost.postId); track reply.postId) {
-                    <div class="comment-item" (click)="openDetailModal(reply); $event.stopPropagation()">
+                    <div
+                      class="comment-item"
+                      (click)="openDetailModal(reply); $event.stopPropagation()"
+                    >
                       <app-user-avatar class="comment-avatar" [user]="postAuthor(reply)" />
                       <div class="comment-content">
                         <div class="comment-meta">
                           <strong>{{ authorName(reply) }}</strong>
-                          <span>{{ authorHandle(reply) }} · {{ (reply.createdAt | date: 'shortTime') || 'Recién' }}</span>
+                          <span
+                            >{{ authorHandle(reply) }} ·
+                            {{ (reply.createdAt | date: 'shortTime') || 'Recién' }}</span
+                          >
                         </div>
                         <p class="comment-text">{{ reply.content }}</p>
                       </div>

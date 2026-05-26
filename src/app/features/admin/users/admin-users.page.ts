@@ -7,8 +7,9 @@ import { SessionService } from '../../../core/auth/session.service';
 import { ConfirmService } from '../../../core/ui/confirm.service';
 import { FeedbackService } from '../../../core/ui/feedback.service';
 import { StateCardComponent } from '../../../shared/components/state-card/state-card.component';
-import { AdminApiService } from '../admin-api.service';
-import { AdminUserRecord } from '../admin.models';
+
+import { AdminUserRecord } from '../models/admin.models';
+import { AdminApiService } from '../services/admin-api.service';
 
 @Component({
   selector: 'app-admin-users-page',

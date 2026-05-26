@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, inject, output } from '@angular/core';
 
 import { AudioPlayerComponent } from './audio-player.component';
-import { AudioRecorderService } from './audio-recorder.service';
+import { AudioRecorderService } from '../services/audio-recorder.service';
 
 /**
  * Modal de grabación de audio. Maneja todo el ciclo de vida del recorder

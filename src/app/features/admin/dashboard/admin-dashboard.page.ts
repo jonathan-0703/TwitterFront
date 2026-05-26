@@ -4,8 +4,9 @@ import { firstValueFrom } from 'rxjs';
 import { getErrorMessage } from '../../../core/api/api.utils';
 import { FeedbackService } from '../../../core/ui/feedback.service';
 import { StateCardComponent } from '../../../shared/components/state-card/state-card.component';
-import { AdminApiService } from '../admin-api.service';
-import { AdminDashboardStats } from '../admin.models';
+
+import { AdminDashboardStats } from '../models/admin.models';
+import { AdminApiService } from '../services/admin-api.service';
 
 @Component({
   selector: 'app-admin-dashboard-page',
