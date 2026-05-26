@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ViewEncapsulation, computed, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ViewEncapsulation, computed, effect, inject, input, output, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import { MediaUrlPipe } from '../../core/ui/media-url.pipe';
@@ -28,6 +28,7 @@ import { PostDto } from './posts.models';
 export class PostCardComponent {
   private readonly postStore = inject(PostStoreService);
   private readonly postsApi = inject(PostsApiService);
+  private readonly requestedOriginalPostIds = new Set<string>();
 
   readonly post = input.required<PostDto>();
   readonly currentUserId = input<string | null | undefined>();
@@ -59,6 +60,14 @@ export class PostCardComponent {
   readonly soundEnabledChange = output<boolean>();
 
   private readonly originalPostsCache = signal<Record<string, PostDto>>({});
+
+  constructor() {
+    effect(() => {
+      const post = this.post();
+      this.ensureOriginalPostLoaded(post.retweetOfPostId);
+      this.ensureOriginalPostLoaded(post.repliedToPostId);
+    });
+  }
 
   protected interactionTarget = computed<PostDto>(() => {
     const post = this.post();
@@ -114,47 +123,70 @@ export class PostCardComponent {
     const cached = this.originalPostsCache()[retweetOfPostId];
     if (cached) return cached;
 
-    if (!(retweetOfPostId in this.originalPostsCache())) {
-      this.originalPostsCache.update((cache) => ({
-        ...cache,
-        [retweetOfPostId]: {
-          postId: retweetOfPostId,
-          userFullName: 'Autor original',
-          username: 'original',
-          content: 'Cargando detalles de la publicación compartida...',
-          createdAt: new Date().toISOString(),
-          isPublished: true,
-          likesCount: 0,
-          retweetsCount: 0,
-          repliesCount: 0,
-        } as PostDto,
-      }));
-
-      firstValueFrom(this.postsApi.getPostById(retweetOfPostId))
-        .then((original) => {
-          if (original) {
-            this.originalPostsCache.update((cache) => ({ ...cache, [retweetOfPostId]: original }));
-          }
-        })
-        .catch(() => {
-          this.originalPostsCache.update((cache) => ({
-            ...cache,
-            [retweetOfPostId]: {
-              postId: retweetOfPostId,
-              userFullName: 'No disponible',
-              username: 'no-disponible',
-              content: 'Esta publicación compartida no se pudo cargar (puede ser privada o estar eliminada).',
-              createdAt: new Date().toISOString(),
-              isPublished: true,
-              likesCount: 0,
-              retweetsCount: 0,
-              repliesCount: 0,
-            } as PostDto,
-          }));
-        });
-    }
-
     return this.originalPostsCache()[retweetOfPostId] ?? null;
+  }
+
+  private ensureOriginalPostLoaded(postId: string | null | undefined): void {
+    if (!postId) return;
+    if (this.postStore.posts().some((post) => post.postId === postId)) return;
+    if (this.originalPostsCache()[postId]) return;
+    if (this.requestedOriginalPostIds.has(postId)) return;
+
+    this.requestedOriginalPostIds.add(postId);
+
+    this.originalPostsCache.update((cache) => ({
+      ...cache,
+      [postId]: {
+        postId,
+        userFullName: 'Autor original',
+        username: 'original',
+        content: 'Cargando detalles de la publicación compartida...',
+        createdAt: new Date().toISOString(),
+        isPublished: true,
+        likesCount: 0,
+        retweetsCount: 0,
+        repliesCount: 0,
+      } as PostDto,
+    }));
+
+    firstValueFrom(this.postsApi.getPostById(postId))
+      .then((original) => {
+        if (original) {
+          this.originalPostsCache.update((cache) => ({ ...cache, [postId]: original }));
+          return;
+        }
+
+        this.originalPostsCache.update((cache) => ({
+          ...cache,
+          [postId]: {
+            postId,
+            userFullName: 'No disponible',
+            username: 'no-disponible',
+            content: 'Esta publicación compartida no se pudo cargar (puede ser privada o estar eliminada).',
+            createdAt: new Date().toISOString(),
+            isPublished: true,
+            likesCount: 0,
+            retweetsCount: 0,
+            repliesCount: 0,
+          } as PostDto,
+        }));
+      })
+      .catch(() => {
+        this.originalPostsCache.update((cache) => ({
+          ...cache,
+          [postId]: {
+            postId,
+            userFullName: 'No disponible',
+            username: 'no-disponible',
+            content: 'Esta publicación compartida no se pudo cargar (puede ser privada o estar eliminada).',
+            createdAt: new Date().toISOString(),
+            isPublished: true,
+            likesCount: 0,
+            retweetsCount: 0,
+            repliesCount: 0,
+          } as PostDto,
+        }));
+      });
   }
 
   protected getParentAuthorHandle(repliedToPostId: string | null | undefined): string {
