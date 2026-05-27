@@ -1,5 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel } from '@microsoft/signalr';
+import { HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel, HttpTransportType } from '@microsoft/signalr';
 import { Subject, Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
@@ -60,6 +60,10 @@ export class SignalRService {
                     accessTokenFactory: () => token, // Enviar el token JWT
                     skipNegotiation: false, // Permitir negociación de transporte
                     withCredentials: true, // Enviar cookies/credenciales
+                    // Configurar transportes: intentar WebSockets primero, luego Long Polling
+                    transport: environment.production
+                        ? HttpTransportType.LongPolling | HttpTransportType.ServerSentEvents // Sin WebSockets en producción
+                        : HttpTransportType.WebSockets | HttpTransportType.ServerSentEvents | HttpTransportType.LongPolling // Todos en desarrollo
                 })
                 .withAutomaticReconnect([0, 2000, 5000, 10000, 30000]) // Reintentos automáticos
                 .configureLogging(LogLevel.Information) // Logs para debugging
