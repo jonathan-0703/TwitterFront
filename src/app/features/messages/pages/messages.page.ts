@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, viewChild, ElementRef } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -43,6 +43,9 @@ export class MessagesPage {
     readonly onlineUsers = signal<Set<string>>(new Set());
     readonly typingUsers = signal<Set<string>>(new Set());
     private typingTimeout: any = null;
+
+    // Referencia al contenedor de mensajes para scroll automático
+    readonly messagesContainer = viewChild<ElementRef<HTMLDivElement>>('messagesContainer');
 
     readonly unreadCount = toSignal(
         interval(10000).pipe(
@@ -116,6 +119,15 @@ export class MessagesPage {
 
         // Verificar si hay un userId en los query params para iniciar conversación
         this.checkForNewConversation();
+
+        // Hacer scroll automático cuando cambian los mensajes
+        effect(() => {
+            const messages = this.selectedConversation();
+            if (messages.length > 0) {
+                // Usar setTimeout para asegurar que el DOM se haya actualizado
+                setTimeout(() => this.scrollToBottom(), 100);
+            }
+        });
     }
 
     /**
@@ -399,5 +411,15 @@ export class MessagesPage {
 
     trackMessage(_index: number, message: MessageDto): string {
         return message.messageId;
+    }
+
+    /**
+     * Hace scroll automático al final del contenedor de mensajes
+     */
+    private scrollToBottom(): void {
+        const container = this.messagesContainer()?.nativeElement;
+        if (container) {
+            container.scrollTop = container.scrollHeight;
+        }
     }
 }

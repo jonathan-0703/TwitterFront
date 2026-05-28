@@ -94,7 +94,7 @@
           </div>
         </div>
 
-        <div class="chat-messages">
+        <div class="chat-messages" #messagesContainer>
           @for (msg of selectedConversation(); track trackMessage($index, msg)) {
             <div
               class="message-wrapper"
